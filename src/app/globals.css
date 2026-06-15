@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #18181b;
+  --foreground: #ededed;
 }
 
 @theme inline {
@@ -12,15 +12,19 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+@layer components {
+  .btn {
+    @apply rounded-md bg-zinc-700 px-3 py-1.5 font-medium text-zinc-100
+      transition-colors hover:bg-zinc-600 active:bg-zinc-500;
+  }
+  .select {
+    @apply rounded-md border border-zinc-600 bg-zinc-800 px-2 py-1.5 text-zinc-100
+      focus:border-zinc-400 focus:outline-none;
+  }
 }

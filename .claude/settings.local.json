@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx --yes create-next-app@15 chessapp --typescript --eslint --app --src-dir --tailwind --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "PowerShell(Move-Item -Destination . -Force)",
+      "PowerShell(npm install react-chessboard zustand 2>&1 | Select-Object -Last 8; Write-Output \"---VERSION---\"; \\(Get-Content node_modules/react-chessboard/package.json | ConvertFrom-Json\\).version)",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  }
+}
