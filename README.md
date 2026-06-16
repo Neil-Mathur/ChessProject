@@ -4,7 +4,8 @@ A web app for playing chess and chess variants. Local two-player on one device,
 or against a built-in computer opponent, with **Standard Chess** and **Monster
 King Chess**, plus board/piece skins.
 
-Done so far: **Phase 1** (board, variants, skins) and **Phase 2** (AI opponent).
+Done so far: **Phase 1** (board, variants, skins), **Phase 2** (AI opponent),
+and **Phase 3** (Google sign-in + preference sync).
 
 ## Stack
 
@@ -20,6 +21,25 @@ npm run dev          # dev server at http://localhost:3000
 npm run build        # production build
 npm run test:engine  # deterministic engine self-test
 ```
+
+## Setup (auth & database)
+
+1. Copy env vars: `cp .env.example .env` and `cp .env.example .env.local`
+   (Prisma CLI reads `.env`; the Next runtime reads `.env.local`).
+2. Generate an auth secret into `.env.local`: `npx auth secret` (or any random
+   string for `AUTH_SECRET`).
+3. Create the dev database: `npx prisma migrate dev`.
+4. `npm run dev`. In development a **Dev Login** button signs you in without
+   Google (it never appears in production).
+5. For real Google sign-in, create an OAuth client at
+   <https://console.cloud.google.com> (redirect URI
+   `http://localhost:3000/api/auth/callback/google`) and set `AUTH_GOOGLE_ID`
+   / `AUTH_GOOGLE_SECRET` in `.env.local`. The "Sign in with Google" button
+   appears automatically once both are set.
+
+**Production database:** change `provider` in `prisma/schema.prisma` to
+`postgresql`, point `DATABASE_URL` at Postgres (Neon/Supabase), and run
+`prisma migrate deploy`. The models are unchanged.
 
 ## Architecture
 
@@ -80,10 +100,21 @@ Board themes (`src/theme/boardThemes.ts`) and piece sets
 variant is skinnable. Adding an image-based set (e.g. cburnett, alpha) means
 adding one `PieceSet` entry that returns artwork per piece code.
 
+### Auth & preferences (Phase 3)
+
+- **Auth.js (NextAuth v5)** with the **Prisma adapter** ([auth.ts](src/auth.ts)).
+  Google provider (shown only when configured) plus a dev-only Credentials
+  "Dev Login". JWT sessions (required for credentials; the adapter still
+  persists OAuth users).
+- **Prisma** ([schema.prisma](prisma/schema.prisma)) — SQLite in dev, Postgres
+  in prod. Auth.js tables + a one-per-user `Preferences` row.
+- **Sync** ([PreferenceSync.tsx](src/components/PreferenceSync.tsx)) — on
+  sign-in, loads the user's prefs from the DB (seeding from local values if
+  none), then debounce-saves on change via [`/api/preferences`](src/app/api/preferences/route.ts).
+  Signed-out users keep using `localStorage`.
+
 ## Roadmap
 
-- **Phase 3** — Google sign-in (Auth.js) + Postgres/Prisma; sync the same
-  preferences shape currently kept in `localStorage`.
 - **Phase 4** — Online multiplayer over WebSockets (serializes `GameState` + `Move`).
 - **Phase 5** — More variants.
 - **Later** — Stockfish (WASM) as a stronger standard-chess engine option.

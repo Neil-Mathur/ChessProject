@@ -52,7 +52,8 @@ export default function BoardPanel() {
       }
     }
     return styles;
-  }, [selected, legalTargets, state]);
+    // `selected` is cleared after every move, so targets recompute when needed.
+  }, [selected, legalTargets]);
 
   /** Apply a move, intercepting promotions to ask for a piece first. */
   function attemptMove(from: string, to: string): boolean {
