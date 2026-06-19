@@ -120,11 +120,68 @@ adding one `PieceSet` entry that returns artwork per piece code.
   none), then debounce-saves on change via [`/api/preferences`](src/app/api/preferences/route.ts).
   Signed-out users keep using `localStorage`.
 
+## Online multiplayer (Phase 4)
+
+The multiplayer feature ships as a **dark flag** — it is completely inert unless
+you opt in. Nothing in the base app imports it.
+
+### Turning it on
+
+```bash
+npm install               # installs socket.io + socket.io-client
+npm run dev:multi         # dev server + Socket.IO on port 3000
+npm run start:multi       # production (Ubuntu VM)
+```
+
+Set `MULTIPLAYER=true` and `NEXT_PUBLIC_MULTIPLAYER=true` in your env (or let
+the `dev:multi` / `start:multi` scripts do it via cross-env). The "Play online"
+nav link and `/lobby` + `/play/[roomId]` routes appear only when the flag is on.
+
+### Turning it off (dark)
+
+Unset both env vars (or don't run the `*:multi` scripts). Zero runtime cost:
+the socket server never starts, `socket.io-client` is never loaded, the routes
+redirect to `/`.
+
+### Architecture
+
+```
+server.ts                         custom HTTP server; attaches Socket.IO when MULTIPLAYER=true
+src/
+  server/socket/
+    index.ts                      Socket.IO event handlers (server-authoritative move validation)
+    gameRoom.ts                   in-memory room state + reconnect tokens
+  multiplayer/
+    protocol.ts                   shared ClientToServer / ServerToClient event types
+    socket.ts                     singleton socket.io-client (lazy, never auto-connects)
+    useMultiplayerGame.ts         React hook: join room, receive state, send moves
+  components/multiplayer/
+    Lobby.tsx                     create / join room UI
+    OnlineBoardPanel.tsx          board for online play (no useGameStore dependency)
+    OnlineGame.tsx                full online game page layout
+  app/
+    lobby/page.tsx                /lobby route (guarded)
+    play/[roomId]/page.tsx        /play/[roomId] route (guarded)
+```
+
+**Server is authoritative.** The client sends a `Move` object; the server
+validates it with the same engine, applies it, and broadcasts the new
+`GameState` to both players. Illegal moves are silently dropped.
+
+**Reconnect.** Each player gets a `playerToken` (stored in `sessionStorage`
+keyed by room ID). Re-joining the same room URL with the token reclaims the
+correct color slot without needing an account.
+
+**Room lifecycle.** Rooms live in memory on the server. If both players
+disconnect, the room is deleted after 5 minutes. A 30-minute pruning job clears
+rooms older than 2 hours. (Server restarts lose active games — add DB persistence
+in a later phase if needed.)
+
 ## Roadmap
 
-- **Phase 4** — Online multiplayer over WebSockets (serializes `GameState` + `Move`).
 - **Phase 5** — More variants.
 - **Later** — Stockfish (WASM) as a stronger standard-chess engine option.
+- **Later** — Persist online game history to the DB.
 
 ## Known Phase-1 limitations / decisions to confirm
 

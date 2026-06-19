@@ -14,6 +14,9 @@ export default function ChessGame() {
           <h1 className="text-2xl font-bold tracking-tight">Chess Variants</h1>
           <p className="text-sm text-zinc-400">
             Play locally or against the computer.
+            {process.env.NEXT_PUBLIC_MULTIPLAYER === "true" && (
+              <> &nbsp;·&nbsp;<a href="/lobby" className="underline hover:text-zinc-200">Play online</a></>
+            )}
           </p>
         </div>
         <AuthButton />
