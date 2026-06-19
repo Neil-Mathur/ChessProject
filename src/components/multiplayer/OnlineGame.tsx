@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useMultiplayerGame } from "@/multiplayer/useMultiplayerGame";
 import OnlineBoardPanel from "./OnlineBoardPanel";
 
@@ -35,7 +36,7 @@ export default function OnlineGame({ roomId }: Props) {
             &nbsp;·&nbsp;You are&nbsp;<span className="font-semibold">{colorLabel}</span>
           </p>
         </div>
-        <a href="/" className="text-sm text-zinc-500 hover:text-zinc-300">← Local play</a>
+        <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-300">← Local play</Link>
       </header>
 
       {/* Status bar */}
@@ -69,7 +70,6 @@ export default function OnlineGame({ roomId }: Props) {
             state={state}
             variant={variant}
             myColor={myColor}
-            result={result}
             locked={status !== "playing" || state.sideToMove !== myColor}
             onMove={sendMove}
           />
@@ -86,7 +86,7 @@ export default function OnlineGame({ roomId }: Props) {
             <div className="rounded-lg bg-zinc-800/60 px-3 py-2 text-sm">
               {state.sideToMove === myColor
                 ? <span className="font-semibold text-emerald-400">Your turn</span>
-                : <span className="text-zinc-400">Opponent's turn…</span>}
+                : <span className="text-zinc-400">Opponent&apos;s turn…</span>}
             </div>
           )}
 
@@ -118,12 +118,9 @@ export default function OnlineGame({ roomId }: Props) {
               </button>
             )}
             {status === "over" && (
-              <a
-                href="/lobby"
-                className="btn text-center text-sm"
-              >
+              <Link href="/lobby" className="btn text-center text-sm">
                 New game
-              </a>
+              </Link>
             )}
           </div>
         </div>

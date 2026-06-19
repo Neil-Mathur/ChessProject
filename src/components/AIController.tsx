@@ -39,7 +39,9 @@ export default function AIController() {
     });
 
     return () => {
-      // Invalidate this request so a late resolution is ignored.
+      // Bump the token to invalidate any in-flight request.
+      // We intentionally mutate the ref here, not read a captured value.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       token.current++;
     };
   }, [state, variant.id, aiWhite, aiBlack, aiDepth, result, commitMove, setThinking]);
