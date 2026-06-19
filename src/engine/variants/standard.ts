@@ -1,14 +1,13 @@
 // Standard chess: 1 move per turn, full legality (no self-check),
 // win by checkmate, draw by stalemate.
-import { findKing, placePieces } from "../board";
+import { placePieces } from "../board";
 import {
   applyMove as applyMoveCore,
-  isAttacked,
-  leavesKingInCheck,
-  opposite,
+  filterLegal,
+  inCheck,
   pseudoLegalMoves,
 } from "../moveGen";
-import { Color, GameResult, GameState, Move } from "../types";
+import { GameResult, GameState, Move } from "../types";
 import { Variant } from "../variant";
 
 const BACK_RANK = ["r", "n", "b", "q", "k", "b", "n", "r"];
@@ -29,21 +28,7 @@ const movesPerTurn = (): number => 1;
 
 function legalMoves(state: GameState): Move[] {
   const color = state.sideToMove;
-  return pseudoLegalMoves(state, color).filter((move) => {
-    // Castling additionally requires not castling out of / through / into check.
-    if (move.castle) {
-      if (inCheck(state, color)) return false;
-      const rank = move.from - (move.from % 8);
-      const mid = move.castle === "k" ? rank + 5 : rank + 3;
-      if (isAttacked(state.board, mid, opposite(color))) return false;
-    }
-    return !leavesKingInCheck(state, move, color);
-  });
-}
-
-function inCheck(state: GameState, color: Color): boolean {
-  const kingSq = findKing(state.board, color);
-  return kingSq !== -1 && isAttacked(state.board, kingSq, opposite(color));
+  return filterLegal(state, pseudoLegalMoves(state, color), color);
 }
 
 function result(state: GameState): GameResult | null {

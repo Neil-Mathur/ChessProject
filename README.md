@@ -1,10 +1,11 @@
 # Chess Variants
 
 A web app for playing chess and chess variants. Local two-player on one device,
-or against a built-in computer opponent, with **Standard Chess** and **Monster
-King Chess**, plus board/piece skins.
+or against a built-in computer opponent, with **Standard Chess**, **Monster
+King Chess**, and **Crazyhouse**, plus board/piece skins.
 
-Done so far: **Phase 1** (board, variants, skins) and **Phase 2** (AI opponent).
+Done so far: **Phase 1** (board, variants, skins), **Phase 2** (AI opponent),
+and **Phase 3** (Google sign-in + preference sync).
 
 ## Stack
 
@@ -21,6 +22,25 @@ npm run build        # production build
 npm run test:engine  # deterministic engine self-test
 ```
 
+## Setup (auth & database)
+
+1. Copy env vars: `cp .env.example .env` and `cp .env.example .env.local`
+   (Prisma CLI reads `.env`; the Next runtime reads `.env.local`).
+2. Generate an auth secret into `.env.local`: `npx auth secret` (or any random
+   string for `AUTH_SECRET`).
+3. Create the dev database: `npx prisma migrate dev`.
+4. `npm run dev`. In development a **Dev Login** button signs you in without
+   Google (it never appears in production).
+5. For real Google sign-in, create an OAuth client at
+   <https://console.cloud.google.com> (redirect URI
+   `http://localhost:3000/api/auth/callback/google`) and set `AUTH_GOOGLE_ID`
+   / `AUTH_GOOGLE_SECRET` in `.env.local`. The "Sign in with Google" button
+   appears automatically once both are set.
+
+**Production database:** change `provider` in `prisma/schema.prisma` to
+`postgresql`, point `DATABASE_URL` at Postgres (Neon/Supabase), and run
+`prisma migrate deploy`. The models are unchanged.
+
 ## Architecture
 
 The engine is pure TypeScript with no React/DOM dependencies, so it can later
@@ -36,6 +56,7 @@ src/engine/
   variants/
     standard.ts     standard chess (checkmate / stalemate)
     monsterKing.ts  Monster King (2 black moves, capture-the-king)
+    crazyhouse.ts   Crazyhouse (captured pieces switch sides and can be dropped)
     index.ts        variant registry
   ai/
     evaluate.ts     static evaluation (White's perspective)
@@ -65,6 +86,12 @@ boundary for stronger standard-chess play.)
    King has no check at all, so pseudo-legal == legal and the game ends only
    when a king is captured (`findKing` returns -1).
 
+3. **Optional state extensions stay opt-in.** Crazyhouse adds `GameState.pockets`
+   (pieces in hand) and `Move.drop`; both are optional, so Standard and Monster
+   King are unaffected. Drops reuse the shared board application + the standard
+   `filterLegal` check filter, and a promoted pawn reverts to a pawn when
+   captured (`Piece.promoted`).
+
 ### Adding a new variant
 
 1. Implement the `Variant` interface in `src/engine/variants/yourVariant.ts`.
@@ -80,13 +107,81 @@ Board themes (`src/theme/boardThemes.ts`) and piece sets
 variant is skinnable. Adding an image-based set (e.g. cburnett, alpha) means
 adding one `PieceSet` entry that returns artwork per piece code.
 
+### Auth & preferences (Phase 3)
+
+- **Auth.js (NextAuth v5)** with the **Prisma adapter** ([auth.ts](src/auth.ts)).
+  Google provider (shown only when configured) plus a dev-only Credentials
+  "Dev Login". JWT sessions (required for credentials; the adapter still
+  persists OAuth users).
+- **Prisma** ([schema.prisma](prisma/schema.prisma)) — SQLite in dev, Postgres
+  in prod. Auth.js tables + a one-per-user `Preferences` row.
+- **Sync** ([PreferenceSync.tsx](src/components/PreferenceSync.tsx)) — on
+  sign-in, loads the user's prefs from the DB (seeding from local values if
+  none), then debounce-saves on change via [`/api/preferences`](src/app/api/preferences/route.ts).
+  Signed-out users keep using `localStorage`.
+
+## Online multiplayer (Phase 4)
+
+The multiplayer feature ships as a **dark flag** — it is completely inert unless
+you opt in. Nothing in the base app imports it.
+
+### Turning it on
+
+```bash
+npm install               # installs socket.io + socket.io-client
+npm run dev:multi         # dev server + Socket.IO on port 3000
+npm run start:multi       # production (Ubuntu VM)
+```
+
+Set `MULTIPLAYER=true` and `NEXT_PUBLIC_MULTIPLAYER=true` in your env (or let
+the `dev:multi` / `start:multi` scripts do it via cross-env). The "Play online"
+nav link and `/lobby` + `/play/[roomId]` routes appear only when the flag is on.
+
+### Turning it off (dark)
+
+Unset both env vars (or don't run the `*:multi` scripts). Zero runtime cost:
+the socket server never starts, `socket.io-client` is never loaded, the routes
+redirect to `/`.
+
+### Architecture
+
+```
+server.ts                         custom HTTP server; attaches Socket.IO when MULTIPLAYER=true
+src/
+  server/socket/
+    index.ts                      Socket.IO event handlers (server-authoritative move validation)
+    gameRoom.ts                   in-memory room state + reconnect tokens
+  multiplayer/
+    protocol.ts                   shared ClientToServer / ServerToClient event types
+    socket.ts                     singleton socket.io-client (lazy, never auto-connects)
+    useMultiplayerGame.ts         React hook: join room, receive state, send moves
+  components/multiplayer/
+    Lobby.tsx                     create / join room UI
+    OnlineBoardPanel.tsx          board for online play (no useGameStore dependency)
+    OnlineGame.tsx                full online game page layout
+  app/
+    lobby/page.tsx                /lobby route (guarded)
+    play/[roomId]/page.tsx        /play/[roomId] route (guarded)
+```
+
+**Server is authoritative.** The client sends a `Move` object; the server
+validates it with the same engine, applies it, and broadcasts the new
+`GameState` to both players. Illegal moves are silently dropped.
+
+**Reconnect.** Each player gets a `playerToken` (stored in `sessionStorage`
+keyed by room ID). Re-joining the same room URL with the token reclaims the
+correct color slot without needing an account.
+
+**Room lifecycle.** Rooms live in memory on the server. If both players
+disconnect, the room is deleted after 5 minutes. A 30-minute pruning job clears
+rooms older than 2 hours. (Server restarts lose active games — add DB persistence
+in a later phase if needed.)
+
 ## Roadmap
 
-- **Phase 3** — Google sign-in (Auth.js) + Postgres/Prisma; sync the same
-  preferences shape currently kept in `localStorage`.
-- **Phase 4** — Online multiplayer over WebSockets (serializes `GameState` + `Move`).
 - **Phase 5** — More variants.
 - **Later** — Stockfish (WASM) as a stronger standard-chess engine option.
+- **Later** — Persist online game history to the DB.
 
 ## Known Phase-1 limitations / decisions to confirm
 

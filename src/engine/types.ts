@@ -9,9 +9,14 @@ export type PieceType = "p" | "n" | "b" | "r" | "q" | "k";
 export interface Piece {
   color: Color;
   type: PieceType;
+  /** Crazyhouse: a promoted pawn reverts to a pawn when captured. */
+  promoted?: boolean;
 }
 
 export type Square = number; // 0..63
+
+/** Sentinel `Move.from` value for a drop move (no origin square). */
+export const DROP_FROM = -1;
 
 export interface Move {
   from: Square;
@@ -24,6 +29,14 @@ export interface Move {
   enPassant?: boolean;
   /** "k" = king-side, "q" = queen-side, undefined = not a castle. */
   castle?: "k" | "q";
+  /** Crazyhouse drop: the piece type placed from the pocket (from = DROP_FROM). */
+  drop?: PieceType;
+}
+
+/** Pieces held in hand per color (Crazyhouse). */
+export interface Pockets {
+  w: PieceType[];
+  b: PieceType[];
 }
 
 export interface CastlingRights {
@@ -42,6 +55,8 @@ export interface GameState {
   castling: CastlingRights;
   /** En-passant target square (the square a pawn skipped), or null. */
   enPassant: Square | null;
+  /** Crazyhouse: captured pieces held in hand. Undefined for variants without drops. */
+  pockets?: Pockets;
   variantId: string;
 }
 

@@ -16,6 +16,7 @@ import {
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 function describeMove(state: GameState, move: Move): string {
+  if (move.drop) return `${move.drop.toUpperCase()}@${squareName(move.to)}`;
   if (move.castle === "k") return "O-O";
   if (move.castle === "q") return "O-O-O";
   const piece = state.board[move.from]!;
@@ -51,6 +52,10 @@ interface GameStore {
   legalTargets: (from: string) => string[];
   /** True if a move from->to would be a pawn promotion (needs a piece choice). */
   isPromotion: (from: string, to: string) => boolean;
+  /** Crazyhouse: attempt to drop a pocket piece onto a square. */
+  tryDrop: (pieceType: string, to: string) => boolean;
+  /** Crazyhouse: squares where the given pocket piece may legally be dropped. */
+  legalDropTargets: (pieceType: string) => string[];
 }
 
 function initFor(variantId: string) {
@@ -150,6 +155,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
     return variant
       .legalMoves(state)
       .some((m) => m.from === fromSq && m.to === toSq && !!m.promotion);
+  },
+
+  tryDrop: (pieceType, to) => {
+    const { variant, state, result } = get();
+    if (result) return false;
+    const toSq = parseSquare(to);
+    const move = variant
+      .legalMoves(state)
+      .find((m) => m.drop === pieceType && m.to === toSq);
+    if (!move) return false;
+    get().commitMove(move);
+    return true;
+  },
+
+  legalDropTargets: (pieceType) => {
+    const { variant, state } = get();
+    return variant
+      .legalMoves(state)
+      .filter((m) => m.drop === pieceType)
+      .map((m) => squareName(m.to));
   },
 }));
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import type { Color, Piece, PieceType } from "@/engine";
+import type { Piece, PieceType } from "@/engine";
 import { deriveCaptured, useGameStore } from "@/store/gameStore";
 import PieceGlyph from "./PieceGlyph";
 

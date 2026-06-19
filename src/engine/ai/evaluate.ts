@@ -39,6 +39,13 @@ export function evaluate(state: GameState): number {
       score += sign * centrality(sq);
     }
   }
+
+  // Crazyhouse: pieces in hand are valuable assets.
+  if (state.pockets) {
+    for (const t of state.pockets.w) score += VALUE[t];
+    for (const t of state.pockets.b) score -= VALUE[t];
+  }
+
   return score;
 }
 

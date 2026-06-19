@@ -1,9 +1,14 @@
 // Variant registry. Register a new variant here and it appears everywhere.
 import { Variant } from "../variant";
+import { crazyhouseVariant } from "./crazyhouse";
 import { monsterKingVariant } from "./monsterKing";
 import { standardVariant } from "./standard";
 
-export const VARIANTS: Variant[] = [standardVariant, monsterKingVariant];
+export const VARIANTS: Variant[] = [
+  standardVariant,
+  monsterKingVariant,
+  crazyhouseVariant,
+];
 
 const byId = new Map(VARIANTS.map((v) => [v.id, v]));
 
