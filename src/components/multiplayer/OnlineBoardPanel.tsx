@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Chessboard } from "react-chessboard";
 import { toFen, parseSquare, squareName } from "@/engine/board";
-import type { Color, GameResult, GameState, Move, PieceType } from "@/engine/types";
+import type { Color, GameState, Move, PieceType } from "@/engine/types";
 import type { Variant } from "@/engine/variant";
 import { usePreferences } from "@/store/preferences";
 import { getBoardTheme } from "@/theme/boardThemes";
@@ -18,7 +18,6 @@ interface Props {
   state: GameState;
   variant: Variant;
   myColor: Color;
-  result: GameResult | null;
   locked: boolean; // true when it's the opponent's turn or the game is over
   onMove: (move: Move) => void;
 }
@@ -27,7 +26,6 @@ export default function OnlineBoardPanel({
   state,
   variant,
   myColor,
-  result,
   locked,
   onMove,
 }: Props) {
@@ -81,7 +79,6 @@ export default function OnlineBoardPanel({
   }, [selected, dropSel, state, variant, legalMovesFromSquare]);
 
   function attemptMove(from: string, to: string): boolean {
-    const fromSq = parseSquare(from);
     const toSq = parseSquare(to);
     const candidates = (legalMovesFromSquare[from] ?? []).filter((m) => m.to === toSq);
     if (candidates.length === 0) return false;

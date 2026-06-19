@@ -8,7 +8,6 @@ import type { ClientToServer, ServerToClient } from "@/multiplayer/protocol";
 import {
   createRoom,
   getRoom,
-  deleteRoom,
   scheduleCleanup,
   pruneRooms,
   colorForToken,

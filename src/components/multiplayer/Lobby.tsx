@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { VARIANTS } from "@/engine/variants";
 import { getSocket } from "@/multiplayer/socket";
 import type { RoomInfo } from "@/multiplayer/protocol";
@@ -75,7 +76,7 @@ export default function Lobby() {
       <div className="text-center">
         <h1 className="text-3xl font-bold tracking-tight">Play Online</h1>
         <p className="mt-2 text-sm text-zinc-400">
-          Create a game and share the room code, or join a friend's game.
+          Create a game and share the room code, or join a friend&apos;s game.
         </p>
       </div>
 
@@ -128,9 +129,9 @@ export default function Lobby() {
         <p className="text-sm font-medium text-red-400">{error}</p>
       )}
 
-      <a href="/" className="text-sm text-zinc-500 hover:text-zinc-300">
+      <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-300">
         ← Back to local play
-      </a>
+      </Link>
     </main>
   );
 }
