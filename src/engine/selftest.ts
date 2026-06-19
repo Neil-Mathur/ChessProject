@@ -103,5 +103,56 @@ function emptyState(variantId: string, sideToMove: "w" | "b"): GameState {
   );
 }
 
+// --- Crazyhouse ---
+const ch = getVariant("crazyhouse");
+{
+  const c = ch.setup();
+  check("crazyhouse: empty pockets at start", c.pockets!.w.length === 0 && c.pockets!.b.length === 0);
+  check("crazyhouse: 20 opening moves (no drops yet)", ch.legalMoves(c).length === 20);
+}
+
+// Capturing adds the captured piece to the mover's pocket.
+{
+  const c = emptyState("crazyhouse", "w");
+  c.pockets = { w: [], b: [] };
+  c.board[parseSquare("e1")] = { color: "w", type: "k" };
+  c.board[parseSquare("e8")] = { color: "b", type: "k" };
+  c.board[parseSquare("d5")] = { color: "w", type: "n" };
+  c.board[parseSquare("e7")] = { color: "b", type: "p" };
+  const cap = ch.legalMoves(c).find((m) => m.from === parseSquare("d5") && m.to === parseSquare("e7"));
+  check("crazyhouse: knight can capture e7", !!cap);
+  const after = ch.applyMove(c, cap!);
+  check("crazyhouse: capture adds a pawn to White's pocket", after.pockets!.w.join("") === "p");
+}
+
+// Dropping spends a pocket piece and places it on the board.
+{
+  const c = emptyState("crazyhouse", "w");
+  c.pockets = { w: ["n"], b: [] };
+  c.board[parseSquare("e1")] = { color: "w", type: "k" };
+  c.board[parseSquare("e8")] = { color: "b", type: "k" };
+  const drop = ch.legalMoves(c).find((m) => m.drop === "n" && m.to === parseSquare("e4"));
+  check("crazyhouse: knight drop on e4 is legal", !!drop);
+  const after = ch.applyMove(c, drop!);
+  check(
+    "crazyhouse: drop places piece and empties pocket",
+    after.board[parseSquare("e4")]?.type === "n" && after.pockets!.w.length === 0
+  );
+  check("crazyhouse: no pawn drops on the back rank", !ch.legalMoves({ ...c, pockets: { w: ["p"], b: [] } }).some((m) => m.drop === "p" && m.to === parseSquare("e8")));
+}
+
+// A captured promoted piece reverts to a pawn in the pocket.
+{
+  const c = emptyState("crazyhouse", "w");
+  c.pockets = { w: [], b: [] };
+  c.board[parseSquare("e1")] = { color: "w", type: "k" };
+  c.board[parseSquare("h8")] = { color: "b", type: "k" };
+  c.board[parseSquare("a1")] = { color: "w", type: "r" };
+  c.board[parseSquare("a8")] = { color: "b", type: "q", promoted: true };
+  const cap = ch.legalMoves(c).find((m) => m.from === parseSquare("a1") && m.to === parseSquare("a8"));
+  const after = ch.applyMove(c, cap!);
+  check("crazyhouse: captured promoted queen reverts to a pawn", after.pockets!.w.join("") === "p");
+}
+
 console.log(failures === 0 ? "\nALL TESTS PASSED" : `\n${failures} TEST(S) FAILED`);
 process.exit(failures === 0 ? 0 : 1);

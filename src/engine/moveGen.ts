@@ -279,6 +279,13 @@ function updateCastlingRights(
  */
 export function applyToBoard(state: GameState, move: Move) {
   const board = cloneBoard(state.board);
+
+  // Crazyhouse drop: place a fresh (non-promoted) piece from the pocket.
+  if (move.drop) {
+    board[move.to] = { color: state.sideToMove, type: move.drop };
+    return { board, castling: state.castling, enPassant: null as Square | null };
+  }
+
   const piece = board[move.from]!;
 
   // En-passant: remove the captured pawn that sits beside the moving pawn.
@@ -287,9 +294,10 @@ export function applyToBoard(state: GameState, move: Move) {
     board[capturedSq] = null;
   }
 
-  // Move the piece (apply promotion if any).
+  // Move the piece (apply promotion if any). A promoted piece is flagged so
+  // Crazyhouse can revert it to a pawn when captured.
   board[move.to] = move.promotion
-    ? { color: piece.color, type: move.promotion }
+    ? { color: piece.color, type: move.promotion, promoted: true }
     : piece;
   board[move.from] = null;
 
@@ -357,6 +365,51 @@ export function leavesKingInCheck(
   const kingSq = findKing(board, color);
   if (kingSq === -1) return true; // king captured = illegal in standard chess
   return isAttacked(board, kingSq, opposite(color));
+}
+
+/** Is `color`'s king currently under attack? */
+export function inCheck(state: GameState, color: Color): boolean {
+  const kingSq = findKing(state.board, color);
+  return kingSq !== -1 && isAttacked(state.board, kingSq, opposite(color));
+}
+
+/**
+ * Filter pseudo-legal moves down to fully legal ones under standard-chess rules:
+ * a move may not leave one's own king in check, and castling may not pass out
+ * of / through / into check. Shared by Standard and Crazyhouse.
+ */
+export function filterLegal(state: GameState, moves: Move[], color: Color): Move[] {
+  return moves.filter((move) => {
+    if (move.castle) {
+      if (inCheck(state, color)) return false;
+      const rank = move.from - (move.from % 8);
+      const mid = move.castle === "k" ? rank + 5 : rank + 3;
+      if (isAttacked(state.board, mid, opposite(color))) return false;
+    }
+    return !leavesKingInCheck(state, move, color);
+  });
+}
+
+/**
+ * Crazyhouse drop moves: each distinct pocket piece type onto every empty
+ * square (pawns may not be dropped on the first or last rank).
+ */
+export function pseudoLegalDrops(state: GameState, color: Color): Move[] {
+  const pocket = state.pockets?.[color];
+  if (!pocket || pocket.length === 0) return [];
+  const out: Move[] = [];
+  const types = Array.from(new Set(pocket));
+  for (const type of types) {
+    for (let sq = 0; sq < 64; sq++) {
+      if (state.board[sq]) continue;
+      if (type === "p") {
+        const r = rankOf(sq);
+        if (r === 0 || r === 7) continue;
+      }
+      out.push({ from: -1, to: sq, drop: type });
+    }
+  }
+  return out;
 }
 
 export { opposite };

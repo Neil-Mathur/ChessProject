@@ -1,8 +1,8 @@
 # Chess Variants
 
 A web app for playing chess and chess variants. Local two-player on one device,
-or against a built-in computer opponent, with **Standard Chess** and **Monster
-King Chess**, plus board/piece skins.
+or against a built-in computer opponent, with **Standard Chess**, **Monster
+King Chess**, and **Crazyhouse**, plus board/piece skins.
 
 Done so far: **Phase 1** (board, variants, skins), **Phase 2** (AI opponent),
 and **Phase 3** (Google sign-in + preference sync).
@@ -56,6 +56,7 @@ src/engine/
   variants/
     standard.ts     standard chess (checkmate / stalemate)
     monsterKing.ts  Monster King (2 black moves, capture-the-king)
+    crazyhouse.ts   Crazyhouse (captured pieces switch sides and can be dropped)
     index.ts        variant registry
   ai/
     evaluate.ts     static evaluation (White's perspective)
@@ -84,6 +85,12 @@ boundary for stronger standard-chess play.)
    Standard chess filters out moves that leave its own king in check; Monster
    King has no check at all, so pseudo-legal == legal and the game ends only
    when a king is captured (`findKing` returns -1).
+
+3. **Optional state extensions stay opt-in.** Crazyhouse adds `GameState.pockets`
+   (pieces in hand) and `Move.drop`; both are optional, so Standard and Monster
+   King are unaffected. Drops reuse the shared board application + the standard
+   `filterLegal` check filter, and a promoted pawn reverts to a pawn when
+   captured (`Piece.promoted`).
 
 ### Adding a new variant
 
