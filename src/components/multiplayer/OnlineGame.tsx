@@ -27,17 +27,14 @@ export default function OnlineGame({ roomId }: Props) {
     : null;
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-5xl flex-col items-center gap-6 px-4 py-8">
-      <header className="flex w-full items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Chess Variants — Online</h1>
-          <p className="text-sm text-zinc-400">
-            Room&nbsp;<span className="font-mono font-semibold tracking-widest text-zinc-200">{roomId}</span>
-            &nbsp;·&nbsp;You are&nbsp;<span className="font-semibold">{colorLabel}</span>
-          </p>
-        </div>
-        <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-300">← Local play</Link>
-      </header>
+    <main className="mx-auto flex min-h-screen max-w-5xl flex-col items-center gap-6 px-4 py-6">
+      {/* Room info strip */}
+      <p className="w-full text-sm text-zinc-500">
+        Room&nbsp;
+        <span className="font-mono font-semibold tracking-widest text-zinc-300">{roomId}</span>
+        &nbsp;·&nbsp;You are&nbsp;
+        <span className="font-semibold text-zinc-300">{colorLabel}</span>
+      </p>
 
       {/* Status bar */}
       <div className={`w-full rounded-lg bg-zinc-800/60 px-4 py-2 text-sm font-medium ${statusColor}`}>
