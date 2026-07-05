@@ -4,8 +4,6 @@ import type { ReactNode } from "react";
 import { VARIANTS } from "@/engine";
 import { useGameStore } from "@/store/gameStore";
 import { usePreferences } from "@/store/preferences";
-import { BOARD_THEMES } from "@/theme/boardThemes";
-import { PIECE_SETS } from "@/theme/pieceSets";
 import Collapsible from "./Collapsible";
 import CapturedPanel from "./CapturedPanel";
 
@@ -37,11 +35,6 @@ export default function ControlsPanel() {
 
   return (
     <div className="flex w-full max-w-sm flex-col gap-4 text-sm">
-      <div>
-        <h2 className="mb-1 text-lg font-semibold">{variant.name}</h2>
-        <p className="text-zinc-400">{variant.description}</p>
-      </div>
-
       <div
         className={`rounded-md px-3 py-2 font-medium ${
           result ? "bg-emerald-600/20 text-emerald-300" : "bg-zinc-700/40"
@@ -67,85 +60,53 @@ export default function ControlsPanel() {
         </button>
       </div>
 
+      <Field label="Variant">
+        <select
+          className="select"
+          value={prefs.variantId}
+          onChange={(e) => selectVariant(e.target.value)}
+        >
+          {VARIANTS.map((v) => (
+            <option key={v.id} value={v.id}>
+              {v.name}
+            </option>
+          ))}
+        </select>
+      </Field>
+
       <Collapsible title="Opponents">
         <div className="flex flex-col gap-3">
-          <Field label="White">
-            <select
-              className="select"
-              value={prefs.aiWhite ? "ai" : "human"}
-              onChange={(e) => prefs.setAiWhite(e.target.value === "ai")}
-            >
-              <option value="human">Human</option>
-              <option value="ai">Computer</option>
-            </select>
-          </Field>
-          <Field label="Black">
-            <select
-              className="select"
-              value={prefs.aiBlack ? "ai" : "human"}
-              onChange={(e) => prefs.setAiBlack(e.target.value === "ai")}
-            >
-              <option value="human">Human</option>
-              <option value="ai">Computer</option>
-            </select>
-          </Field>
-          <Field label="Difficulty">
-            <select
-              className="select"
-              value={prefs.aiDepth}
-              onChange={(e) => prefs.setAiDepth(Number(e.target.value))}
-            >
-              <option value={2}>Easy</option>
-              <option value={3}>Medium</option>
-              <option value={4}>Hard</option>
-            </select>
-          </Field>
-        </div>
-      </Collapsible>
-
-      <Collapsible title="Settings">
-        <div className="flex flex-col gap-3">
-          <Field label="Variant">
-            <select
-              className="select"
-              value={prefs.variantId}
-              onChange={(e) => selectVariant(e.target.value)}
-            >
-              {VARIANTS.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          <Field label="Board skin">
-            <select
-              className="select"
-              value={prefs.boardThemeId}
-              onChange={(e) => prefs.setBoardTheme(e.target.value)}
-            >
-              {BOARD_THEMES.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          <Field label="Piece skin">
-            <select
-              className="select"
-              value={prefs.pieceSetId}
-              onChange={(e) => prefs.setPieceSet(e.target.value)}
-            >
-              {PIECE_SETS.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </Field>
+          <RadioGroup
+            label="White"
+            name="white-ctrl"
+            value={prefs.aiWhite ? "ai" : "human"}
+            onChange={(v) => prefs.setAiWhite(v === "ai")}
+            options={[
+              { value: "human", label: "Human" },
+              { value: "ai",    label: "Computer" },
+            ]}
+          />
+          <RadioGroup
+            label="Black"
+            name="black-ctrl"
+            value={prefs.aiBlack ? "ai" : "human"}
+            onChange={(v) => prefs.setAiBlack(v === "ai")}
+            options={[
+              { value: "human", label: "Human" },
+              { value: "ai",    label: "Computer" },
+            ]}
+          />
+          <RadioGroup
+            label="Difficulty"
+            name="difficulty"
+            value={String(prefs.aiDepth)}
+            onChange={(v) => prefs.setAiDepth(Number(v))}
+            options={[
+              { value: "2", label: "Easy" },
+              { value: "3", label: "Medium" },
+              { value: "4", label: "Hard" },
+            ]}
+          />
         </div>
       </Collapsible>
 
@@ -176,5 +137,42 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
       <span className="text-zinc-400">{label}</span>
       {children}
     </label>
+  );
+}
+
+function RadioGroup({
+  label,
+  name,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-zinc-400">{label}</span>
+      <div className="flex gap-3">
+        {options.map((opt) => (
+          <label key={opt.value} className="flex cursor-pointer items-center gap-1.5">
+            <input
+              type="radio"
+              name={name}
+              value={opt.value}
+              checked={value === opt.value}
+              onChange={() => onChange(opt.value)}
+              className="accent-emerald-500"
+            />
+            <span className={value === opt.value ? "text-white" : "text-zinc-400"}>
+              {opt.label}
+            </span>
+          </label>
+        ))}
+      </div>
+    </div>
   );
 }

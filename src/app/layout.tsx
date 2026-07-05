@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Chess Variants",
-  description: "Play chess variants including Monster King Chess.",
+  title: "Mad Chess Lab",
+  description: "Play chess variants: Standard, Monster King, and Crazyhouse. Local or online.",
 };
 
 export default function RootLayout({

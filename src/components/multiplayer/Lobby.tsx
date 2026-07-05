@@ -128,10 +128,6 @@ export default function Lobby() {
       {error && (
         <p className="text-sm font-medium text-red-400">{error}</p>
       )}
-
-      <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-300">
-        ← Back to local play
-      </Link>
     </main>
   );
 }
