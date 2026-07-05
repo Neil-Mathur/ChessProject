@@ -3,24 +3,29 @@
 import Image from "next/image";
 import { SessionProvider } from "next-auth/react";
 import type { ReactNode } from "react";
-import bannerImage from "@/resources/Banner0.png";
+import bannerImage from "@/resources/Banner2.png";
 import Nav from "./Nav";
+import PreferenceSync from "./PreferenceSync";
 
 export default function Providers({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
-      {/* Site-wide banner */}
-      <div className="w-full bg-zinc-950">
+      {/* Banner — sticks at top so sidebar offset stays correct while scrolling */}
+      <div className="relative w-full sticky top-0 z-50 bg-zinc-950" style={{ height: "100px" }}>
         <Image
           src={bannerImage}
-          alt="Another Chess"
+          alt="Mad Chess Lab"
           priority
-          style={{ width: "100%", height: "auto" }}
+          fill
+          style={{ objectFit: "cover", objectPosition: "center" }}
         />
       </div>
-      {/* Sticky nav sits below the banner */}
-      <Nav />
-      {children}
+      {/* Sidebar + page content */}
+      <div className="flex min-h-[calc(100vh-100px)]">
+        <Nav />
+        <div className="flex-1 min-w-0">{children}</div>
+      </div>
+      <PreferenceSync />
     </SessionProvider>
   );
 }

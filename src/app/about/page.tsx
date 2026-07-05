@@ -1,13 +1,13 @@
 export default function AboutPage() {
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="mb-2 text-3xl font-bold tracking-tight">About Another Chess</h1>
+      <h1 className="mb-2 text-3xl font-bold tracking-tight">About MadChessLab</h1>
       <p className="mb-8 text-zinc-400">A playground for chess variants.</p>
 
       <section className="mb-8">
         <h2 className="mb-3 text-lg font-semibold">What is this?</h2>
         <p className="leading-relaxed text-zinc-300">
-          Another Chess is a web app for playing chess variants against a friend on the same
+          MadChessLab is a web app for playing chess variants against a friend on the same
           device, against a built-in computer opponent, or online against another player in
           real time. It ships with three rule sets and is built to make adding more straightforward.
         </p>

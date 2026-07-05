@@ -10,41 +10,23 @@ export default function Nav() {
   const isOnline = pathname.startsWith("/lobby") || pathname.startsWith("/play/");
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/95 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-5xl items-center gap-6 px-4 py-3">
-        {/* Brand */}
-        <Link
-          href="/"
-          className="shrink-0 text-lg font-bold tracking-tight text-white hover:text-zinc-300"
-        >
-          Another Chess
-        </Link>
+    <nav className="sticky top-[100px] z-40 h-[calc(100vh-100px)] w-48 shrink-0 self-start border-r border-zinc-800 bg-zinc-950 flex flex-col px-3 py-4">
+      <div className="flex flex-col gap-0.5 text-sm">
+        <NavLink href="/" active={pathname === "/"}>Home</NavLink>
 
-        {/* Links */}
-        <div className="flex items-center gap-5 text-sm">
-          <NavLink href="/" active={pathname === "/"}>
-            Home
-          </NavLink>
-          <NavLink href="/about" active={pathname === "/about"}>
-            About
-          </NavLink>
-          {process.env.NEXT_PUBLIC_MULTIPLAYER === "true" && (
-            isOnline ? (
-              <NavLink href="/" active={false}>
-                ⇄ Play Local
-              </NavLink>
-            ) : (
-              <NavLink href="/lobby" active={isOnline}>
-                ⇄ Play Online
-              </NavLink>
-            )
-          )}
-        </div>
-
-        {/* Push auth to the right */}
-        <div className="flex-1" />
-        <AuthButton />
+        {process.env.NEXT_PUBLIC_MULTIPLAYER === "true" && (
+          isOnline ? (
+            <NavLink href="/" active={false}>⇄ Play Local</NavLink>
+          ) : (
+            <NavLink href="/lobby" active={isOnline}>⇄ Play Online</NavLink>
+          )
+        )}
+        <NavLink href="/about" active={pathname === "/about"}>About</NavLink>
+        <NavLink href="/settings" active={pathname === "/settings"}>Settings</NavLink>
       </div>
+
+      <div className="flex-1" />
+      <AuthButton />
     </nav>
   );
 }
@@ -61,10 +43,10 @@ function NavLink({
   return (
     <Link
       href={href}
-      className={`transition-colors ${
+      className={`block rounded px-2 py-1.5 transition-colors ${
         active
-          ? "font-semibold text-white"
-          : "text-zinc-400 hover:text-zinc-100"
+          ? "bg-zinc-800 font-semibold text-white"
+          : "text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100"
       }`}
     >
       {children}
