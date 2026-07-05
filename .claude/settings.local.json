@@ -4,7 +4,23 @@
       "Bash(npx --yes create-next-app@15 chessapp --typescript --eslint --app --src-dir --tailwind --import-alias \"@/*\" --use-npm --no-turbopack)",
       "PowerShell(Move-Item -Destination . -Force)",
       "PowerShell(npm install react-chessboard zustand 2>&1 | Select-Object -Last 8; Write-Output \"---VERSION---\"; \\(Get-Content node_modules/react-chessboard/package.json | ConvertFrom-Json\\).version)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "PowerShell(Get-PSDrive D | Select-Object Used,Free,@{N='FreeGB';E={[math]::Round\\($_.Free/1GB,2\\)}},@{N='UsedGB';E={[math]::Round\\($_.Used/1GB,2\\)}})",
+      "Bash(git check-ignore *)",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git restore *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(New-Item -ItemType Directory -Force \"D:\\\\NeilProjects\\\\ChessProject\\\\src\\\\app\\\\lobby\")",
+      "Bash(Out-Null)",
+      "Bash(New-Item -ItemType Directory -Force \"D:\\\\NeilProjects\\\\ChessProject\\\\src\\\\app\\\\play\\\\[roomId]\")",
+      "Bash(gh pr *)",
+      "Bash(.venv/Scripts/python agent.py)",
+      "Bash(git commit -m ' *)",
+      "mcp__claude-in-chrome__navigate",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "Bash(npx tsc *)"
     ]
   }
 }
