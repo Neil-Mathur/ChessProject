@@ -37,11 +37,6 @@ export default function ControlsPanel() {
 
   return (
     <div className="flex w-full max-w-sm flex-col gap-4 text-sm">
-      <div>
-        <h2 className="mb-1 text-lg font-semibold">{variant.name}</h2>
-        <p className="text-zinc-400">{variant.description}</p>
-      </div>
-
       <div
         className={`rounded-md px-3 py-2 font-medium ${
           result ? "bg-emerald-600/20 text-emerald-300" : "bg-zinc-700/40"
