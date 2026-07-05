@@ -21,8 +21,9 @@ export default function Nav() {
             <NavLink href="/lobby" active={isOnline}>⇄ Play Online</NavLink>
           )
         )}
-        <NavLink href="/about" active={pathname === "/about"}>About</NavLink>
+
         <NavLink href="/settings" active={pathname === "/settings"}>Settings</NavLink>
+        <NavLink href="/about" active={pathname === "/about"}>About</NavLink>
       </div>
 
       <div className="flex-1" />
