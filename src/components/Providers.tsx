@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { SessionProvider } from "next-auth/react";
 import type { ReactNode } from "react";
-import bannerImage from "@/resources/Banner2.png";
+import bannerImage from "@/resources/banner2.png";
 import Nav from "./Nav";
 import PreferenceSync from "./PreferenceSync";
 
