@@ -11,10 +11,19 @@ export default function AboutPage() {
           device, against a built-in computer opponent, or online against another player in
           real time. It ships with three rule sets and is built to make adding more straightforward.
         </p>
+        <br/>
         <p>
           Now lttle bit about me.
-          I'm Neil, and I learned to play chess from my uncle in India when I was 6 years old. While I started playing just for fun, it quickly grew to become a dedicated hobby. I always have fun playing with friends at school and helping them advance. As a solid, tactical player, I've grown to enjoy complex chess puzzles and compositions, and I love using them to help train students. Whether over the board, or online, I always like learning from my mistakes to become a stronger player.
+          I'm Neil Mathur, and I learned to play chess from my uncle in India when I was 6 years old. While I started playing just for fun, it quickly grew to become a dedicated hobby. I always have fun playing with friends at school and helping them advance. As a solid, tactical player, I've grown to enjoy complex chess puzzles and compositions, and I love using them to help train students. Whether over the board, or online, I always like learning from my mistakes to become a stronger player.
         </p>
+        <br/>
+        <a href="https://www.chess.com/member/neilmathur" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+          Chess.com Profile
+        </a>
+        <br/>
+        <a href="https://ratings.uschess.org/player/30707858" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+          US Chess Rating
+        </a>
       </section>
 
       <section className="mb-8">
@@ -23,7 +32,7 @@ export default function AboutPage() {
           <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
             <h3 className="mb-1 font-semibold">Standard Chess</h3>
             <p className="text-sm text-zinc-400">
-              Classic chess. Each side moves once per turn. Win by checkmate; draw by stalemate.
+              Not really a variant but Classic chess. Each side moves once per turn. Win by checkmate; draw by stalemate.
             </p>
           </div>
           <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
