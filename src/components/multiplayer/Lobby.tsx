@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { VARIANTS } from "@/engine/variants";
 import { getSocket } from "@/multiplayer/socket";
 import type { RoomInfo } from "@/multiplayer/protocol";

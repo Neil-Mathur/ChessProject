@@ -8,7 +8,6 @@ import Collapsible from "./Collapsible";
 import CapturedPanel from "./CapturedPanel";
 
 export default function ControlsPanel() {
-  const variant = useGameStore((s) => s.variant);
   const state = useGameStore((s) => s.state);
   const result = useGameStore((s) => s.result);
   const thinking = useGameStore((s) => s.thinking);

@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import type { CSSProperties } from "react";
 import type { PieceRenderObject } from "react-chessboard";
 
