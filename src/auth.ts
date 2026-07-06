@@ -34,6 +34,7 @@ if (process.env.NODE_ENV !== "production") {
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers,
+  trustHost: true,
   // JWT sessions are required for the Credentials provider and work fine with
   // the Prisma adapter (which still persists OAuth users/accounts).
   session: { strategy: "jwt" },
