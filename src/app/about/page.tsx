@@ -11,6 +11,10 @@ export default function AboutPage() {
           device, against a built-in computer opponent, or online against another player in
           real time. It ships with three rule sets and is built to make adding more straightforward.
         </p>
+        <p>
+          Now lttle bit about me.
+          I'm Neil, and I learned to play chess from my uncle in India when I was 6 years old. While I started playing just for fun, it quickly grew to become a dedicated hobby. I always have fun playing with friends at school and helping them advance. As a solid, tactical player, I've grown to enjoy complex chess puzzles and compositions, and I love using them to help train students. Whether over the board, or online, I always like learning from my mistakes to become a stronger player.
+        </p>
       </section>
 
       <section className="mb-8">
