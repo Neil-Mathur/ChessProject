@@ -10,23 +10,24 @@ All React components use the `"use client"` directive (the entire app is client-
 
 ```
 layout.tsx
-└── Providers (wraps everything in SessionProvider)
-    └── page.tsx (dynamic import, SSR disabled)
-        └── ChessGame
-            ├── AuthButton
-            ├── BoardPanel
-            │   ├── PocketBar (top — opponent's pocket, Crazyhouse only)
-            │   ├── Chessboard (react-chessboard)
-            │   │   └── PromotionDialog (overlay, when a pawn reaches rank 8)
-            │   └── PocketBar (bottom — current player's pocket, Crazyhouse only)
-            ├── ControlsPanel
-            │   ├── Collapsible "Opponents"
-            │   ├── Collapsible "Settings"
-            │   ├── Collapsible "Captured"
-            │   │   └── CapturedPanel
-            │   └── Collapsible "Moves"
-            ├── AIController (headless, renders null)
-            └── PreferenceSync (headless, renders null)
+└── Providers
+    ├── Banner image (sticky, 56px mobile / 100px desktop)
+    ├── Nav (sidebar on desktop, fixed bottom bar on mobile)
+    ├── page.tsx (dynamic import, SSR disabled)
+    │   └── ChessGame
+    │       ├── BoardPanel
+    │       │   ├── PocketBar (top — opponent's pocket, Crazyhouse only)
+    │       │   ├── Chessboard (react-chessboard)
+    │       │   │   └── PromotionDialog (overlay, when a pawn reaches rank 8)
+    │       │   └── PocketBar (bottom — current player's pocket, Crazyhouse only)
+    │       ├── ControlsPanel
+    │       │   ├── Variant selector (above Opponents)
+    │       │   ├── Collapsible "Opponents"
+    │       │   ├── Collapsible "Captured"
+    │       │   │   └── CapturedPanel
+    │       │   └── Collapsible "Moves"
+    │       └── AIController (headless, renders null)
+    └── PreferenceSync (headless, renders null)
 ```
 
 ---
@@ -100,13 +101,11 @@ An overlay that appears on top of the board when a pawn reaches the back rank. S
 
 The right-hand side panel. Contains four collapsible sections:
 
-### Opponents
-Dropdowns for White and Black (Human / Computer). Difficulty selector (Easy / Medium / Hard). Changes take effect immediately via `usePreferences`.
+### Variant selector
+Dropdown above the Opponents section. Selects the rule set and starts a new game immediately.
 
-### Settings
-- **Variant** — selects the rule set and starts a new game immediately
-- **Board skin** — selects from `BOARD_THEMES`
-- **Piece skin** — selects from `PIECE_SETS`
+### Opponents
+Radio buttons for White and Black (Human / Computer). Difficulty radio group (Easy / Medium / Hard). Changes take effect immediately via `usePreferences`.
 
 ### Captured
 Delegates to `CapturedPanel`. Shows material advantage.
@@ -158,7 +157,45 @@ Headless component (renders `null`). Manages the two-way sync between `localStor
 
 ## Providers (`Providers.tsx`)
 
-Wraps the entire app in `<SessionProvider>` from `next-auth/react`, which makes the session available to all client components via `useSession()`.
+Root layout wrapper that renders:
+1. **Banner** — sticky `<Image>` (`banner2.png`), 56px on mobile / 100px on desktop.
+2. **Nav** — see below.
+3. **Page content** — `{children}` in a scrollable flex container with bottom padding on mobile (leaves room for the fixed bottom nav bar).
+4. **PreferenceSync** — headless, placed here (not inside `ChessGame`) so settings-page changes are not overwritten when navigating back to the home page.
+
+Wraps everything in `<SessionProvider>` from `next-auth/react`, which makes the session available to all client components via `useSession()`.
+
+---
+
+## Nav (`Nav.tsx`)
+
+Dual navigation: a **desktop sidebar** (hidden on mobile, `w-48`, sticky below banner) and a **mobile bottom bar** (fixed, `h-14`, hidden on desktop). Both render the same links: Home, About, Settings, and Play Online (when multiplayer is enabled). The `AuthButton` appears at the bottom of the sidebar on desktop and inline in the bottom bar on mobile.
+
+---
+
+## Settings page (`src/app/settings/page.tsx`)
+
+A dedicated `/settings` route for cosmetic preferences. Contains:
+- **Board skin** — selects from `BOARD_THEMES`
+- **Piece skin** — selects from `PIECE_SETS`
+
+Changes are persisted via `usePreferences` (localStorage, or DB if signed in).
+
+---
+
+## About page (`src/app/about/page.tsx`)
+
+Static page describing the project, the author, variants, features, and tech stack.
+
+---
+
+## Responsive layout
+
+The app is fully responsive:
+- **Mobile:** compact 56px banner, no sidebar, board scales to `min(100vw − 2rem, 100vh − 200px, 460px)`, controls stack below the board, fixed bottom nav bar.
+- **Desktop:** 100px banner, 192px sidebar, board + controls side-by-side, no-scroll layout (`h-[calc(100vh−100px)]`).
+
+The `BoardPanel` container uses CSS `min()` with three values to handle both cases with a single rule.
 
 ---
 
@@ -178,8 +215,9 @@ These components are only loaded when `NEXT_PUBLIC_MULTIPLAYER=true`. See [compo
 
 **Board themes** (`src/theme/boardThemes.ts`): Five themes, each a `{ id, name, light, dark }` pair of CSS colour strings. Applied via `darkSquareStyle` / `lightSquareStyle` on the `Chessboard` component.
 
-**Piece sets** (`src/theme/pieceSets.tsx`): Two sets:
+**Piece sets** (`src/theme/pieceSets.tsx`): Three sets:
 - `"default"` — react-chessboard's built-in SVG pieces (no custom rendering)
-- `"glyph"` — Unicode chess glyphs styled with `textShadow` for contrast on both square colours
+- `"glyph"` — Unicode chess glyphs (♔♕♖…) in an SVG `viewBox` with stroke for contrast on both square colours; U+FE0E variation selector forces monochrome rendering
+- `"minecraft"` — pixel-art SVG pieces via a `pixelPiece()` helper with `imageRendering: pixelated`
 
 New image-based sets (e.g. cburnett, alpha) can be added by adding an entry to `PIECE_SETS` that returns a `PieceRenderObject` (a record of React components keyed by `"wP"`, `"bK"`, etc.).

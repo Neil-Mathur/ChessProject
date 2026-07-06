@@ -5,7 +5,8 @@ or against a built-in computer opponent, with **Standard Chess**, **Monster
 King Chess**, and **Crazyhouse**, plus board/piece skins.
 
 Done so far: **Phase 1** (board, variants, skins), **Phase 2** (AI opponent),
-and **Phase 3** (Google sign-in + preference sync).
+**Phase 3** (Google sign-in + preference sync), **Phase 4** (online multiplayer),
+and **Phase 5** (responsive mobile layout, nginx/production deployment).
 
 ## Stack
 
@@ -18,7 +19,9 @@ and **Phase 3** (Google sign-in + preference sync).
 
 ```bash
 npm run dev          # dev server at http://localhost:3000
+npm run dev:multi    # dev server + Socket.IO (multiplayer)
 npm run build        # production build
+npm run start:multi  # production with Socket.IO (multiplayer)
 npm run test:engine  # deterministic engine self-test
 ```
 
@@ -104,8 +107,10 @@ nothing in the UI hard-codes variant rules.
 
 Board themes (`src/theme/boardThemes.ts`) and piece sets
 (`src/theme/pieceSets.tsx`) are pure data, independent of rules, so every
-variant is skinnable. Adding an image-based set (e.g. cburnett, alpha) means
-adding one `PieceSet` entry that returns artwork per piece code.
+variant is skinnable. Three piece sets ship: **Default** (react-chessboard SVGs),
+**Glyphs** (Unicode chess glyphs with text-shadow contrast), and **Minecraft**
+(pixel-art SVGs). Adding an image-based set means adding one `PieceSet` entry
+that returns artwork per piece code.
 
 ### Auth & preferences (Phase 3)
 
@@ -179,9 +184,10 @@ in a later phase if needed.)
 
 ## Roadmap
 
-- **Phase 5** — More variants.
+- **Next** — More chess variants.
 - **Later** — Stockfish (WASM) as a stronger standard-chess engine option.
 - **Later** — Persist online game history to the DB.
+- **Later** — Automated acceptance test runner (Playwright + Cucumber) for the Gherkin specs in `testing/`.
 
 ## Known Phase-1 limitations / decisions to confirm
 

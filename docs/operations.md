@@ -127,7 +127,7 @@ pm2 save
 
 ```bash
 cd /opt/chess
-git pull origin main      # or your branch
+git pull origin master
 
 npm install               # if package.json changed
 
@@ -277,6 +277,8 @@ Before deploying to a new server, verify all required values are set in `.env.lo
 |---|---|---|
 | `DATABASE_URL` | Yes | Points to Postgres connection string in production |
 | `AUTH_SECRET` | Yes | Non-empty, at least 32 chars |
+| `AUTH_URL` | Yes (behind proxy) | Set to `https://yourdomain.com` |
+| `AUTH_TRUST_HOST` | Yes (behind proxy) | Set to `"true"` |
 | `AUTH_GOOGLE_ID` | If Google login needed | Correct for the production domain |
 | `AUTH_GOOGLE_SECRET` | If Google login needed | Matches the ID |
 | `MULTIPLAYER` | If multiplayer enabled | `"true"` |

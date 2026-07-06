@@ -15,6 +15,8 @@ Browser
 │
 ├── Next.js App Router (src/app/)
 │   ├── / ─────────────────────── Local game page
+│   ├── /about ──────────────────── About page
+│   ├── /settings ───────────────── Board/piece skin settings
 │   ├── /lobby ─────────────────── Online multiplayer lobby   [flag-gated]
 │   ├── /play/[roomId] ──────────── Online game page          [flag-gated]
 │   └── /api/
@@ -22,12 +24,13 @@ Browser
 │       └── preferences         ─── GET/PUT user preferences
 │
 ├── React component tree
-│   ├── ChessGame ──────────────── Root layout for local play
-│   │   ├── BoardPanel ─────────── Board + pocket bars + promotion dialog
-│   │   ├── ControlsPanel ──────── Variant/skin/opponent settings + move log
-│   │   ├── AIController ───────── Headless component; drives the AI worker
-│   │   ├── AuthButton ─────────── Sign-in / sign-out button
-│   │   └── PreferenceSync ──────── Syncs preferences with the DB when signed in
+│   ├── Providers ──────────────── Banner + Nav + PreferenceSync wrapper
+│   │   ├── Nav ────────────────── Sidebar (desktop) / bottom bar (mobile)
+│   │   ├── PreferenceSync ──────── Headless; syncs prefs with DB when signed in
+│   │   └── ChessGame ──────────── Root layout for local play
+│   │       ├── BoardPanel ─────── Board + pocket bars + promotion dialog
+│   │       ├── ControlsPanel ──── Variant selector + opponent/move log controls
+│   │       └── AIController ───── Headless component; drives the AI worker
 │   └── multiplayer/
 │       ├── Lobby ──────────────── Create/join room UI
 │       └── OnlineGame ─────────── Online game layout

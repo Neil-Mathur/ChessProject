@@ -63,6 +63,22 @@ Format: `1234567890-abc123.apps.googleusercontent.com`
 
 ---
 
+### `AUTH_TRUST_HOST`
+
+**Required in production when running behind a reverse proxy (e.g. nginx).** Set to `"true"`.
+
+Auth.js validates the `Host` header of incoming requests. Behind a proxy, the host seen by Next.js is `127.0.0.1:3000`, not the public domain, which causes an `UntrustedHost` error. Setting `AUTH_TRUST_HOST=true` (or `trustHost: true` in `auth.ts`) disables this check.
+
+---
+
+### `AUTH_URL`
+
+**Required in production.** The canonical public URL of the app, e.g. `https://madchesslab.com`.
+
+Auth.js uses this to construct OAuth redirect URIs and cookie paths. In development, it is inferred from the request.
+
+---
+
 ### `MULTIPLAYER`
 
 **Optional. Server-side only.** Set to `"true"` to attach Socket.IO to the HTTP server.
@@ -133,6 +149,10 @@ AUTH_SECRET="replace-with-output-of-npx-auth-secret"
 AUTH_GOOGLE_ID=""
 AUTH_GOOGLE_SECRET=""
 
+# Production-only (required when running behind nginx or any reverse proxy)
+AUTH_URL="https://yourdomain.com"
+AUTH_TRUST_HOST="true"
+
 # Online multiplayer (optional — both must be "true" to enable)
 MULTIPLAYER=""
 NEXT_PUBLIC_MULTIPLAYER=""
@@ -148,6 +168,8 @@ NEXT_PUBLIC_MULTIPLAYER=""
 | `AUTH_SECRET` | — | ✓ | — |
 | `AUTH_GOOGLE_ID` | — | ✓ | — |
 | `AUTH_GOOGLE_SECRET` | — | ✓ | — |
+| `AUTH_URL` | — | ✓ | — |
+| `AUTH_TRUST_HOST` | — | ✓ | — |
 | `MULTIPLAYER` | — | ✓ | — |
 | `NEXT_PUBLIC_MULTIPLAYER` | — | ✓ | ✓ (inlined at build) |
 | `PORT` | — | ✓ (server.ts only) | — |
