@@ -7,7 +7,7 @@
     "dev:multi": "cross-env MULTIPLAYER=true NEXT_PUBLIC_MULTIPLAYER=true tsx server.ts",
     "build": "next build",
     "start": "next start",
-    "start:multi": "cross-env MULTIPLAYER=true NEXT_PUBLIC_MULTIPLAYER=true tsx server.ts",
+    "start:multi": "cross-env NODE_ENV=production MULTIPLAYER=true NEXT_PUBLIC_MULTIPLAYER=true tsx server.ts",
     "lint": "eslint",
     "test:engine": "tsx src/engine/selftest.ts"
   },
