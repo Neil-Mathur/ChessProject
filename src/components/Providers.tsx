@@ -10,8 +10,8 @@ import PreferenceSync from "./PreferenceSync";
 export default function Providers({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
-      {/* Banner — sticks at top so sidebar offset stays correct while scrolling */}
-      <div className="relative w-full sticky top-0 z-50 bg-zinc-950" style={{ height: "100px" }}>
+      {/* Banner — 56px on mobile, 100px on desktop */}
+      <div className="relative w-full sticky top-0 z-50 bg-zinc-950 h-14 md:h-[100px]">
         <Image
           src={bannerImage}
           alt="Mad Chess Lab"
@@ -21,9 +21,10 @@ export default function Providers({ children }: { children: ReactNode }) {
         />
       </div>
       {/* Sidebar + page content */}
-      <div className="flex h-[calc(100vh-100px)] overflow-hidden">
+      <div className="flex h-[calc(100vh-3.5rem)] md:h-[calc(100vh-100px)] overflow-hidden">
         <Nav />
-        <div className="flex-1 min-w-0 overflow-y-auto">{children}</div>
+        {/* pb-14 on mobile leaves room above the fixed bottom nav bar */}
+        <div className="flex-1 min-w-0 overflow-y-auto pb-14 md:pb-0">{children}</div>
       </div>
       <PreferenceSync />
     </SessionProvider>

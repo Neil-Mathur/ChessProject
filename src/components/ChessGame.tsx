@@ -9,7 +9,7 @@ export default function ChessGame() {
   const variant = useGameStore((s) => s.variant);
 
   return (
-    <main className="mx-auto flex h-full max-w-5xl flex-col items-center gap-2 px-4 py-3">
+    <main className="mx-auto flex md:h-full max-w-5xl flex-col items-center gap-2 px-4 py-3">
       {/* Variant name + description above the board */}
       <div className="w-full">
         <h2 className="text-xl font-semibold">{variant.name}</h2>

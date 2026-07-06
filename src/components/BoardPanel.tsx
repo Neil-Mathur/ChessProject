@@ -143,7 +143,7 @@ export default function BoardPanel() {
     !locked && !pending && state.sideToMove === color;
 
   return (
-    <div className="flex flex-col gap-2" style={{ width: "clamp(260px, calc(100vh - 200px), 460px)" }}>
+    <div className="flex flex-col gap-2" style={{ width: "min(calc(100vw - 2rem), calc(100vh - 200px), 460px)" }}>
       {pockets && (
         <PocketBar
           color={topColor}
