@@ -34,7 +34,7 @@ export const usePreferences = create<Preferences>()(
       orientation: "white",
       aiWhite: false,
       aiBlack: false,
-      aiDepth: 3,
+      aiDepth: 10,
       setVariant: (variantId) => set({ variantId }),
       setBoardTheme: (boardThemeId) => set({ boardThemeId }),
       setPieceSet: (pieceSetId) => set({ pieceSetId }),
