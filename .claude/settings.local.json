@@ -33,7 +33,9 @@
       "PowerShell(git add src/app/layout.tsx)",
       "PowerShell(git push -u origin add-google-analytics)",
       "PowerShell(git checkout master)",
-      "PowerShell(git pull origin master)"
+      "PowerShell(git pull origin master)",
+      "PowerShell(gh pr view 7 --repo Neil-Mathur/ChessProject)",
+      "PowerShell(Stop-Process -Name node -Force -ErrorAction SilentlyContinue)"
     ]
   }
 }

@@ -45,17 +45,16 @@ function ensureReady(): Promise<void> {
   return ready;
 }
 
-// Depth mapped from the app's difficulty setting (aiDepth 2/3/4).
-const DEPTH_MAP: Record<number, number> = { 2: 5, 3: 10, 4: 15 };
-
 /**
  * Ask Stockfish for the best move in UCI format ("e2e4", "e7e8q", etc.).
  * Only one search runs at a time; a new call while one is pending will cancel
  * the in-flight search via "stop" before starting the next one.
+ * @param fen The position as a FEN string
+ * @param level Stockfish search depth (1-20)
  */
 export async function requestStockfishMove(
   fen: string,
-  aiDepth: number
+  level: number
 ): Promise<string | null> {
   await ensureReady();
   const w = getWorker();
@@ -70,7 +69,8 @@ export async function requestStockfishMove(
 
   return new Promise<string | null>((resolve) => {
     pendingResolve = resolve;
-    const depth = DEPTH_MAP[aiDepth] ?? 10;
+    // Clamp level to 1-20 range
+    const depth = Math.max(1, Math.min(20, level));
     w.postMessage("ucinewgame");
     w.postMessage(`position fen ${fen}`);
     w.postMessage(`go depth ${depth}`);

@@ -17,7 +17,7 @@ export default function AboutPage() {
           I&apos;m Neil Mathur, and I learned to play chess from my uncle in India when I was 6 years old. While I started playing just for fun, it quickly grew to become a dedicated hobby. I always have fun playing with friends at school and helping them advance. As a solid, tactical player, I&apos;ve grown to enjoy complex chess puzzles and compositions, and I love using them to help train students. Whether over the board, or online, I always like learning from my mistakes to become a stronger player.
         </p>
         <br/>
-        <a href="https://www.chess.com/member/neilmathur" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+        <a href="https://www.chess.com/member/thatelodoner" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
           Chess.com Profile
         </a>
         <br/>
