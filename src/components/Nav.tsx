@@ -2,12 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import type { ReactNode } from "react";
 import AuthButton from "./AuthButton";
 
+const ADMIN_EMAIL = "paritosh.mathur@gmail.com";
+
 export default function Nav() {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const isOnline = pathname.startsWith("/lobby") || pathname.startsWith("/play/");
+  const isAdmin = session?.user?.email === ADMIN_EMAIL;
 
   const links = (
     <>
@@ -19,6 +24,7 @@ export default function Nav() {
       )}
       <NavLink href="/about" active={pathname === "/about"}>About</NavLink>
       <NavLink href="/settings" active={pathname === "/settings"}>Settings</NavLink>
+      {isAdmin && <NavLink href="/admin" active={pathname === "/admin"}>Admin</NavLink>}
     </>
   );
 
