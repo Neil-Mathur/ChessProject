@@ -12,8 +12,33 @@ import {
   pruneRooms,
   colorForToken,
 } from "./gameRoom";
+import { prisma } from "@/lib/prisma";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
+
+async function persistGame(
+  variantId: string,
+  outcome: string,
+  reason: string,
+  moveLog: string[],
+  whiteUserId: string | null,
+  blackUserId: string | null
+): Promise<void> {
+  try {
+    await prisma.game.create({
+      data: {
+        variantId,
+        outcome,
+        reason,
+        moveLog: JSON.stringify(moveLog),
+        whiteUserId: whiteUserId || undefined,
+        blackUserId: blackUserId || undefined,
+      },
+    });
+  } catch (err) {
+    console.error("Failed to persist game:", err);
+  }
+}
 
 function describeMove(state: GameState, move: Move): string {
   if (move.drop) return `${move.drop.toUpperCase()}@${squareName(move.to)}`;
@@ -39,12 +64,13 @@ export function attachSocketIO(httpServer: HttpServer): void {
     let joinedRoomId: string | null = null;
     let myColor: Color | null = null;
 
-    socket.on("create_room", (variantId, cb) => {
+    socket.on("create_room", (variantId, userId, cb) => {
       try {
         const variant = getVariant(variantId);
         const state = variant.setup();
         const room = createRoom(variantId, state);
         room.players.w = socket.id;
+        room.userIds.w = userId || null;
         myColor = "w";
         joinedRoomId = room.id;
         socket.join(room.id);
@@ -62,7 +88,7 @@ export function attachSocketIO(httpServer: HttpServer): void {
       }
     });
 
-    socket.on("join_room", ({ roomId, playerToken }, cb) => {
+    socket.on("join_room", ({ roomId, playerToken, userId }, cb) => {
       const room = getRoom(roomId);
       if (!room) return cb({ ok: false, error: "Room not found." });
       if (room.result) return cb({ ok: false, error: "That game has already ended." });
@@ -98,6 +124,7 @@ export function attachSocketIO(httpServer: HttpServer): void {
       const token = Math.random().toString(36).slice(2, 18).toUpperCase();
       room.tokens.b = token;
       room.players.b = socket.id;
+      room.userIds.b = userId || null;
       myColor = "b";
       joinedRoomId = room.id;
       socket.join(room.id);
@@ -146,6 +173,20 @@ export function attachSocketIO(httpServer: HttpServer): void {
         result: room.result,
         lastMove: matched,
       });
+
+      // Persist the game if it has ended.
+      if (room.result) {
+        persistGame(
+          room.variantId,
+          room.result.outcome,
+          room.result.reason,
+          room.moveLog,
+          room.userIds.w,
+          room.userIds.b
+        ).catch(() => {
+          // Logging is already done in persistGame
+        });
+      }
     });
 
     socket.on("resign", () => {
@@ -155,6 +196,18 @@ export function attachSocketIO(httpServer: HttpServer): void {
       const outcome = myColor === "w" ? "black" : "white";
       room.result = { outcome, reason: "Resignation" };
       io.to(room.id).emit("game_over", { result: room.result });
+
+      // Persist the game.
+      persistGame(
+        room.variantId,
+        room.result.outcome,
+        room.result.reason,
+        room.moveLog,
+        room.userIds.w,
+        room.userIds.b
+      ).catch(() => {
+        // Logging is already done in persistGame
+      });
     });
 
     socket.on("disconnect", () => {

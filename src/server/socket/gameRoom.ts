@@ -9,6 +9,8 @@ export interface Room {
   players: { w: string | null; b: string | null };
   /** Persistent identity tokens per color — survive reconnects. */
   tokens: { w: string | null; b: string | null };
+  /** User IDs per color (null if anonymous or not yet joined). */
+  userIds: { w: string | null; b: string | null };
   moveLog: string[];
   result: GameResult | null;
   createdAt: number;
@@ -30,6 +32,7 @@ export function createRoom(variantId: string, state: GameState): Room {
     state,
     players: { w: null, b: null },
     tokens: { w: randomId(16), b: null },
+    userIds: { w: null, b: null },
     moveLog: [],
     result: null,
     createdAt: Date.now(),

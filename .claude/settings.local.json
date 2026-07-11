@@ -23,7 +23,17 @@
       "Bash(npx tsc *)",
       "mcp__claude-in-chrome__read_page",
       "mcp__claude-in-chrome__computer",
-      "mcp__claude-in-chrome__resize_window"
+      "mcp__claude-in-chrome__resize_window",
+      "Bash(node -e \"const sf = require\\('stockfish'\\); console.log\\(typeof sf\\); console.log\\(Object.keys\\(sf\\)\\)\")",
+      "PowerShell(git checkout -b add-stockfish-standard-chess)",
+      "PowerShell(git add package.json package-lock.json src/components/AIController.tsx src/engine/board.ts src/ai/stockfishClient.ts public/stockfish.js public/stockfish.wasm)",
+      "PowerShell(git push -u origin add-stockfish-standard-chess)",
+      "PowerShell(gh auth status)",
+      "PowerShell(git checkout -b add-google-analytics master)",
+      "PowerShell(git add src/app/layout.tsx)",
+      "PowerShell(git push -u origin add-google-analytics)",
+      "PowerShell(git checkout master)",
+      "PowerShell(git pull origin master)"
     ]
   }
 }
