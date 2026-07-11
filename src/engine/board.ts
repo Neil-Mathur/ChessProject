@@ -35,8 +35,7 @@ export function piecePositionId(piece: Piece): string {
   return `${piece.color}${piece.type.toUpperCase()}`;
 }
 
-/** Export the piece placement + side-to-move as a FEN string for rendering. */
-export function toFen(state: GameState): string {
+function buildPiecePlacement(state: GameState): string {
   const rows: string[] = [];
   for (let rank = 7; rank >= 0; rank--) {
     let row = "";
@@ -46,17 +45,32 @@ export function toFen(state: GameState): string {
       if (!piece) {
         empty++;
       } else {
-        if (empty > 0) {
-          row += empty;
-          empty = 0;
-        }
+        if (empty > 0) { row += empty; empty = 0; }
         row += pieceToChar(piece);
       }
     }
     if (empty > 0) row += empty;
     rows.push(row);
   }
-  return `${rows.join("/")} ${state.sideToMove} - - 0 1`;
+  return rows.join("/");
+}
+
+/** Export the piece placement + side-to-move as a FEN string for rendering. */
+export function toFen(state: GameState): string {
+  return `${buildPiecePlacement(state)} ${state.sideToMove} - - 0 1`;
+}
+
+/** Full FEN with castling rights and en-passant — required for Stockfish. */
+export function toFullFen(state: GameState): string {
+  const { castling, enPassant } = state;
+  let castle = "";
+  if (castling.wk) castle += "K";
+  if (castling.wq) castle += "Q";
+  if (castling.bk) castle += "k";
+  if (castling.bq) castle += "q";
+  if (!castle) castle = "-";
+  const ep = enPassant !== null ? squareName(enPassant) : "-";
+  return `${buildPiecePlacement(state)} ${state.sideToMove} ${castle} ${ep} 0 1`;
 }
 
 /** Find the square of the given side's king, or -1 if captured. */
