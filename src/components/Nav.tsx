@@ -22,9 +22,10 @@ export default function Nav() {
           ? <NavLink href="/" active={false}>⇄ Play Local</NavLink>
           : <NavLink href="/lobby" active={isOnline}>⇄ Play Online</NavLink>
       )}
+
+      {session && <NavLink href="/games" active={pathname === "/games"}>Games</NavLink>}
       <NavLink href="/about" active={pathname === "/about"}>About</NavLink>
       <NavLink href="/settings" active={pathname === "/settings"}>Settings</NavLink>
-      {session && <NavLink href="/games" active={pathname === "/games"}>Games</NavLink>}
       {isAdmin && <NavLink href="/admin" active={pathname === "/admin"}>Admin</NavLink>}
     </>
   );
@@ -43,12 +44,13 @@ export default function Nav() {
       {/* ── Mobile bottom bar (hidden on desktop) ──────────────── */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-zinc-800 bg-zinc-950/95 backdrop-blur-sm h-14 px-2">
         <MobileNavLink href="/" active={pathname === "/"}>Home</MobileNavLink>
+        {session && <MobileNavLink href="/games" active={pathname === "/games"}>Games</MobileNavLink>}
         <MobileNavLink href="/about" active={pathname === "/about"}>About</MobileNavLink>
         <MobileNavLink href="/settings" active={pathname === "/settings"}>Settings</MobileNavLink>
-        {session && <MobileNavLink href="/games" active={pathname === "/games"}>Games</MobileNavLink>}
         <div className="text-xs">
           <AuthButton />
         </div>
+      
       </nav>
     </>
   );

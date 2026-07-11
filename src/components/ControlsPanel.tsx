@@ -95,17 +95,34 @@ export default function ControlsPanel() {
               { value: "ai",    label: "Computer" },
             ]}
           />
-          <RadioGroup
-            label="Difficulty"
-            name="difficulty"
-            value={String(prefs.aiDepth)}
-            onChange={(v) => prefs.setAiDepth(Number(v))}
-            options={[
-              { value: "2", label: "Easy" },
-              { value: "3", label: "Medium" },
-              { value: "4", label: "Hard" },
-            ]}
-          />
+          {prefs.variantId === "standard" ? (
+            <Field label={`Stockfish Level: ${prefs.aiDepth}`}>
+              <input
+                type="range"
+                min="1"
+                max="20"
+                value={prefs.aiDepth}
+                onChange={(e) => prefs.setAiDepth(Number(e.target.value))}
+                className="w-full accent-emerald-500"
+              />
+              <div className="flex justify-between text-xs text-zinc-500">
+                <span>Weaker (1)</span>
+                <span>Stronger (20)</span>
+              </div>
+            </Field>
+          ) : (
+            <RadioGroup
+              label="Difficulty"
+              name="difficulty"
+              value={String(prefs.aiDepth)}
+              onChange={(v) => prefs.setAiDepth(Number(v))}
+              options={[
+                { value: "2", label: "Easy" },
+                { value: "3", label: "Medium" },
+                { value: "4", label: "Hard" },
+              ]}
+            />
+          )}
         </div>
       </Collapsible>
 
