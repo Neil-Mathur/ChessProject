@@ -24,6 +24,7 @@ export default function Nav() {
       )}
       <NavLink href="/about" active={pathname === "/about"}>About</NavLink>
       <NavLink href="/settings" active={pathname === "/settings"}>Settings</NavLink>
+      {session && <NavLink href="/games" active={pathname === "/games"}>Games</NavLink>}
       {isAdmin && <NavLink href="/admin" active={pathname === "/admin"}>Admin</NavLink>}
     </>
   );
@@ -44,6 +45,7 @@ export default function Nav() {
         <MobileNavLink href="/" active={pathname === "/"}>Home</MobileNavLink>
         <MobileNavLink href="/about" active={pathname === "/about"}>About</MobileNavLink>
         <MobileNavLink href="/settings" active={pathname === "/settings"}>Settings</MobileNavLink>
+        {session && <MobileNavLink href="/games" active={pathname === "/games"}>Games</MobileNavLink>}
         <div className="text-xs">
           <AuthButton />
         </div>

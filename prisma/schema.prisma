@@ -12,14 +12,16 @@ datasource db {
 // --- Auth.js (NextAuth) models ---
 
 model User {
-  id            String       @id @default(cuid())
-  name          String?
-  email         String?      @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  preferences   Preferences?
+  id             String        @id @default(cuid())
+  name           String?
+  email          String?       @unique
+  emailVerified  DateTime?
+  image          String?
+  accounts       Account[]
+  sessions       Session[]
+  preferences    Preferences?
+  gamesAsWhite   Game[]        @relation("GamesAsWhite")
+  gamesAsBlack   Game[]        @relation("GamesAsBlack")
 }
 
 model Account {
@@ -71,4 +73,25 @@ model Preferences {
   aiDepth      Int
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Online multiplayer game history
+model Game {
+  id           String   @id @default(cuid())
+  variantId    String
+  outcome      String   // "white" | "black" | "draw"
+  reason       String   // "checkmate", "stalemate", "resignation", etc.
+  moveLog      String   // JSON-serialized array of move strings
+
+  whiteUserId  String?
+  blackUserId  String?
+  whiteUser    User?    @relation("GamesAsWhite", fields: [whiteUserId], references: [id], onDelete: SetNull)
+  blackUser    User?    @relation("GamesAsBlack", fields: [blackUserId], references: [id], onDelete: SetNull)
+
+  createdAt    DateTime @default(now())
+  endedAt      DateTime @default(now())
+
+  @@index([whiteUserId])
+  @@index([blackUserId])
+  @@index([createdAt])
 }

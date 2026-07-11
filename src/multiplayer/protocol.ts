@@ -20,7 +20,7 @@ export interface ClientToServer {
     cb: (info: RoomInfo) => void
   ) => void;
   join_room: (
-    data: { roomId: string; playerToken?: string },
+    data: { roomId: string; playerToken?: string; userId?: string },
     cb: (res: { ok: true; info: RoomInfo } | { ok: false; error: string }) => void
   ) => void;
   move: (data: { move: Move }) => void;
