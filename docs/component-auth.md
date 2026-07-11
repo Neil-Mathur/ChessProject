@@ -156,6 +156,28 @@ model Preferences {
 
 ---
 
+## Admin page authorisation
+
+The `/admin` page (`src/app/admin/page.tsx`) demonstrates the server-side authorisation pattern used for restricted pages:
+
+```typescript
+const ADMIN_EMAIL = "paritosh.mathur@gmail.com";
+
+export default async function AdminPage() {
+  const session = await auth();
+  if (session?.user?.email !== ADMIN_EMAIL) redirect("/");
+  // ... fetch and render data
+}
+```
+
+Key points:
+
+- **The check is server-side.** `auth()` reads the session from the JWT cookie on the server; the redirect happens before any database query runs, so restricted data never reaches an unauthorised client.
+- **The nav link is cosmetic.** `Nav.tsx` hides the Admin link from non-admins using `useSession()` client-side, but that is a UX nicety, not security — anyone can type `/admin` into the URL bar and will simply be redirected.
+- **Adding another admin** currently means editing the `ADMIN_EMAIL` constant in both `src/app/admin/page.tsx` and `src/components/Nav.tsx`. If more admins are ever needed, move the check to a role column on the `User` model or an env var.
+
+---
+
 ## Setting up Google sign-in
 
 1. Go to [console.cloud.google.com](https://console.cloud.google.com).

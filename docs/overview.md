@@ -17,6 +17,7 @@ Browser
 │   ├── / ─────────────────────── Local game page
 │   ├── /about ──────────────────── About page
 │   ├── /settings ───────────────── Board/piece skin settings
+│   ├── /admin ──────────────────── DB table viewer            [admin email only]
 │   ├── /lobby ─────────────────── Online multiplayer lobby   [flag-gated]
 │   ├── /play/[roomId] ──────────── Online game page          [flag-gated]
 │   └── /api/
@@ -72,7 +73,9 @@ Server (when MULTIPLAYER=true — server.ts)
 | Database (dev) | SQLite | via Prisma |
 | Database (prod) | PostgreSQL | via Prisma |
 | Real-time | Socket.IO | v4 |
-| AI search | Custom alpha-beta | — |
+| AI — Standard Chess | Stockfish (WASM, single-threaded lite) | 18 |
+| AI — other variants | Custom alpha-beta | — |
+| Analytics | Google Analytics (gtag.js) | — |
 
 ---
 
@@ -93,13 +96,22 @@ useGameStore.state updated → React re-renders
         │
 AIController detects it is computer's turn
         │
-botClient.requestBestMove()  →  Web Worker (aiWorker.ts)
-        │                            │
-        │                     searchBestMove()
-        │                     (alpha-beta over Variant)
-        └──────── move ←───────────/
-                  │
-        useGameStore.commitMove()  → re-renders
+        ├── Standard Chess:
+        │   stockfishClient.requestStockfishMove(toFullFen(state), depth)
+        │           │
+        │           ▼
+        │   Web Worker (/public/stockfish.js — Stockfish 18 WASM, UCI)
+        │           │
+        │   "bestmove e2e4" → parsed → useGameStore.tryMove(from, to, promo)
+        │
+        └── Other variants:
+            botClient.requestBestMove()  →  Web Worker (aiWorker.ts)
+                    │                            │
+                    │                     searchBestMove()
+                    │                     (alpha-beta over Variant)
+                    └──────── move ←───────────/
+                              │
+                    useGameStore.commitMove()  → re-renders
 ```
 
 ---
@@ -151,14 +163,19 @@ The client sends a `Move` to the server. The server validates it against the eng
 ├── server.ts                    Custom HTTP entry (Next.js + Socket.IO)
 ├── prisma/schema.prisma         Database schema
 ├── docs/                        This documentation
+├── public/
+│   ├── stockfish.js             Stockfish 18 WASM loader (runs as a Web Worker)
+│   └── stockfish.wasm           Stockfish 18 engine binary (~7 MB, lazily fetched)
 └── src/
     ├── app/                     Next.js App Router pages and API routes
+    │   └── admin/               Admin DB viewer (email-gated server component)
     ├── components/              React components
     │   └── multiplayer/         Online-game components (flag-gated)
     ├── engine/                  Pure TS rules engine (no React/DOM)
     │   ├── variants/            Standard, MonsterKing, Crazyhouse + registry
     │   └── ai/                  Evaluator + alpha-beta search
-    ├── ai/                      Web Worker glue (aiWorker.ts, botClient.ts)
+    ├── ai/                      Worker glue: aiWorker.ts + botClient.ts (variants),
+    │                            stockfishClient.ts (Standard Chess, UCI)
     ├── multiplayer/             Client socket singleton + useMultiplayerGame hook
     ├── server/socket/           Server-side Socket.IO handlers + room state
     ├── store/                   Zustand stores (gameStore, preferences)

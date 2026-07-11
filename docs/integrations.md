@@ -168,6 +168,43 @@ On Linux/macOS the `VAR=value` syntax works natively. `cross-env` makes these sc
 
 ---
 
+## Stockfish (v18, WASM)
+
+**Purpose:** Chess engine for the Standard Chess computer opponent.
+**Package:** `stockfish` (npm) — but the engine is **not imported as a module**. The lite single-threaded build is copied from `node_modules/stockfish/bin/` into `/public` and served as static assets:
+
+| File | Size | Role |
+|---|---|---|
+| `public/stockfish.js` | ~21 KB | JS loader; runs as a self-contained Web Worker when instantiated with the URL hash `#,worker` |
+| `public/stockfish.wasm` | ~7 MB | Compiled engine; loaded by the JS from the same base path |
+
+**Used in:** `src/ai/stockfishClient.ts` (UCI protocol over `postMessage`), driven by `AIController.tsx` when `variant.id === "standard"`.
+
+**Why the single-threaded build:** the multi-threaded build requires `SharedArrayBuffer`, which browsers only enable when the server sends cross-origin-isolation headers (`Cross-Origin-Opener-Policy` / `Cross-Origin-Embedder-Policy`). The single-threaded build works without any server configuration — including behind the production nginx proxy.
+
+**Performance note:** the 7 MB WASM file is fetched only when a Standard Chess game against the computer actually starts (the worker is created lazily). It is cached by the browser afterwards.
+
+**Upgrading:** after `npm update stockfish`, re-copy the two files from `node_modules/stockfish/bin/stockfish-<version>-lite-single.{js,wasm}` into `/public` (keeping the names `stockfish.js` / `stockfish.wasm`).
+
+**License:** Stockfish is GPL-3.0. It is served as an unmodified standalone asset and communicates with the app only over the UCI text protocol.
+
+---
+
+## Google Analytics (gtag.js)
+
+**Purpose:** Site usage analytics.
+**Measurement ID:** `G-82297QND66`
+**Used in:** `src/app/layout.tsx` (root layout — covers every page)
+
+Loaded with Next.js `next/script` using `strategy="afterInteractive"`, so the tag loads after hydration and never blocks page rendering. Two script tags are injected:
+
+1. The async gtag.js loader from `googletagmanager.com`
+2. An inline snippet that initialises `window.dataLayer` and calls `gtag('config', 'G-82297QND66')`
+
+Because it lives in the root layout, every page gets exactly one tag — do not add the snippet to individual pages. Traffic reports are available at [analytics.google.com](https://analytics.google.com) under the property for this measurement ID.
+
+---
+
 ## Google Fonts (Geist)
 
 **Purpose:** Typography.

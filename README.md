@@ -7,6 +7,8 @@ King Chess**, and **Crazyhouse**, plus board/piece skins.
 Done so far: **Phase 1** (board, variants, skins), **Phase 2** (AI opponent),
 **Phase 3** (Google sign-in + preference sync), **Phase 4** (online multiplayer),
 and **Phase 5** (responsive mobile layout, nginx/production deployment).
+Since then: **Stockfish 18 (WASM)** as the Standard Chess engine, an
+**admin page** (email-gated DB table viewer), and **Google Analytics**.
 
 ## Stack
 
@@ -66,16 +68,22 @@ src/engine/
     search.ts       alpha-beta minimax over the variant's own move generation
 ```
 
-### AI opponent (Phase 2)
+### AI opponent (Phase 2 + Stockfish)
 
-A built-in **alpha-beta** engine (`src/engine/ai`) runs in a Web Worker
-(`src/ai/aiWorker.ts`, driven by `botClient.ts` + `AIController.tsx`). Because it
-searches via `Variant.legalMoves` / `applyMove` and evaluates from White's
-perspective (White maximizes, Black minimizes), it works for **every** variant —
-including Monster King's two-moves-per-turn and capture-the-king rules — with no
-special-casing. Difficulty = search depth. Each side can be set to Human or
-Computer independently. (Stockfish can be added later behind the same worker
-boundary for stronger standard-chess play.)
+Two engines, both running in Web Workers so the UI never blocks:
+
+- **Standard Chess** uses **Stockfish 18 (WASM)** — the lite single-threaded
+  build served from `/public`, driven over UCI by `src/ai/stockfishClient.ts`.
+  Difficulty maps Easy/Medium/Hard → Stockfish depth 5/10/15.
+- **All other variants** use the built-in **alpha-beta** engine
+  (`src/engine/ai`, worker glue in `src/ai/aiWorker.ts` + `botClient.ts`).
+  Because it searches via `Variant.legalMoves` / `applyMove` and evaluates from
+  White's perspective, it works for **every** variant — including Monster
+  King's two-moves-per-turn and capture-the-king rules — with no special-casing.
+  Difficulty = search depth (2/3/4 plies).
+
+`AIController.tsx` routes to the right engine by `variant.id`. Each side can be
+set to Human or Computer independently.
 
 ### Two key design decisions
 
@@ -182,10 +190,18 @@ disconnect, the room is deleted after 5 minutes. A 30-minute pruning job clears
 rooms older than 2 hours. (Server restarts lose active games — add DB persistence
 in a later phase if needed.)
 
+## Admin & analytics
+
+- **Admin page** (`/admin`) — server component showing the top 100 rows of the
+  User, Account, Session, and Preferences tables. Access is restricted to a
+  hardcoded admin email; everyone else is redirected to `/`. The nav link only
+  renders for the admin.
+- **Google Analytics** — gtag.js is loaded once in the root layout
+  (`src/app/layout.tsx`) via `next/script`, covering every page.
+
 ## Roadmap
 
 - **Next** — More chess variants.
-- **Later** — Stockfish (WASM) as a stronger standard-chess engine option.
 - **Later** — Persist online game history to the DB.
 - **Later** — Automated acceptance test runner (Playwright + Cucumber) for the Gherkin specs in `testing/`.
 
