@@ -129,7 +129,7 @@ pm2 save
 cd /opt/chess
 git pull origin master
 
-npm install               # if package.json changed
+npm ci                    # if package.json changed
 
 # Rebuild (always required for Next.js)
 npm run build
@@ -140,6 +140,13 @@ npm run build
 npx prisma migrate deploy
 
 pm2 restart chess
+```
+
+**Use `npm ci`, not `npm install`, on the server.** `npm install` may rewrite `package-lock.json`, which then blocks the next `git pull` with *"Your local changes to package-lock.json would be overwritten by merge"*. `npm ci` installs exactly what the lockfile specifies and never modifies it. If the server's lockfile has already been modified, discard it before pulling:
+
+```bash
+git restore package-lock.json
+git pull origin master
 ```
 
 ---
@@ -296,3 +303,5 @@ Before deploying to a new server, verify all required values are set in `.env.lo
 | Socket.IO not connecting | `MULTIPLAYER` not set, or app started with `npm start` instead of `start:multi` | Check the start command and env vars |
 | Online moves not applying | Client not reconnecting after server restart | Refresh the page; tokens in `sessionStorage` allow reconnection |
 | `PrismaClientInitializationError` | Wrong `DATABASE_URL` format, or Postgres not reachable | Check the connection string; run `npx prisma db pull` to test |
+| `git pull` aborts: local changes to `package-lock.json` | `npm install` was run on the server and rewrote the lockfile | `git restore package-lock.json`, pull again; use `npm ci` going forward |
+| Standard Chess AI never moves | `stockfish.js`/`stockfish.wasm` missing from `/public`, or blocked by proxy | Check the browser Network tab for a 404 on `/stockfish.wasm`; verify both files deployed |

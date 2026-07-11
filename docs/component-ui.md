@@ -171,6 +171,8 @@ Wraps everything in `<SessionProvider>` from `next-auth/react`, which makes the 
 
 Dual navigation: a **desktop sidebar** (hidden on mobile, `w-48`, sticky below banner) and a **mobile bottom bar** (fixed, `h-14`, hidden on desktop). Both render the same links: Home, About, Settings, and Play Online (when multiplayer is enabled). The `AuthButton` appears at the bottom of the sidebar on desktop and inline in the bottom bar on mobile.
 
+An **Admin** link additionally appears in the desktop sidebar only (not the mobile bar) when the signed-in user's email matches the hardcoded admin email (checked via `useSession()`). This is a UI convenience only — the real access control is on the `/admin` page itself.
+
 ---
 
 ## Settings page (`src/app/settings/page.tsx`)
@@ -186,6 +188,18 @@ Changes are persisted via `usePreferences` (localStorage, or DB if signed in).
 ## About page (`src/app/about/page.tsx`)
 
 Static page describing the project, the author, variants, features, and tech stack.
+
+---
+
+## Admin page (`src/app/admin/page.tsx`)
+
+A **server component** (no `"use client"`) that shows the top 100 rows of each database table: `User`, `Account`, `Session`, `Preferences`.
+
+**Access control:** the page calls `auth()` server-side and compares `session.user.email` against a hardcoded admin email. Any other visitor (signed in or not) is redirected to `/` before any data is fetched. Because the check runs on the server, the data never reaches an unauthorised browser.
+
+**Rendering:** the four tables are fetched in parallel with `Promise.all` + `prisma.<model>.findMany({ take: 100 })` and rendered as horizontally scrollable tables with truncated cells. Dates are formatted server-side; no client JS is involved.
+
+See [component-auth.md](./component-auth.md#admin-page-authorisation) for the authorisation pattern.
 
 ---
 
