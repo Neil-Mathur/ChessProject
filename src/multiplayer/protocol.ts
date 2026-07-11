@@ -17,6 +17,7 @@ export interface RoomInfo {
 export interface ClientToServer {
   create_room: (
     variantId: string,
+    userId: string | undefined,
     cb: (info: RoomInfo) => void
   ) => void;
   join_room: (
