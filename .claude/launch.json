@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
+    },
+    {
+      "name": "dev-multi",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:multi"],
+      "port": 3000
     }
   ]
 }
