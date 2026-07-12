@@ -14,14 +14,16 @@ export interface RoomInfo {
 }
 
 // Events client → server
+// Note: the signed-in user is identified server-side from the Auth.js session
+// cookie during the Socket.IO handshake — never from a client-supplied field,
+// which would be forgeable.
 export interface ClientToServer {
   create_room: (
     variantId: string,
-    userId: string | undefined,
     cb: (info: RoomInfo) => void
   ) => void;
   join_room: (
-    data: { roomId: string; playerToken?: string; userId?: string },
+    data: { roomId: string; playerToken?: string },
     cb: (res: { ok: true; info: RoomInfo } | { ok: false; error: string }) => void
   ) => void;
   move: (data: { move: Move }) => void;

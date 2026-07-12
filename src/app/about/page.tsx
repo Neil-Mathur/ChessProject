@@ -64,7 +64,7 @@ export default function AboutPage() {
         </ul>
       </section>
 
-      <section>
+      <section className="mb-8">
         <h2 className="mb-3 text-lg font-semibold">Tech</h2>
         <p className="text-sm text-zinc-400">
           Built with Next.js 15, TypeScript, Tailwind CSS, Zustand, and a custom
@@ -72,6 +72,21 @@ export default function AboutPage() {
           responsive while the computer thinks. Online play uses Socket.IO with
           server-side move validation.
         </p>
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-lg font-semibold">Feedback</h2>
+        <div className="flex justify-center">
+          <iframe
+            src="https://docs.google.com/forms/d/e/1FAIpQLSeZMd8MCvx6h7UCOWPCNGVkXJadBTY8IJ3AEb05lUtUFKwdeg/viewform?embedded=true"
+            width="700"
+            height="520"
+            className="max-w-full border-0"
+            title="Feedback form"
+          >
+            Loading…
+          </iframe>
+        </div>
       </section>
     </main>
   );

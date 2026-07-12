@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useSession } from "next-auth/react";
 import { getVariant } from "@/engine/variants";
 import type { Color, GameResult, GameState, Move } from "@/engine/types";
 import type { Variant } from "@/engine/variant";
@@ -29,7 +28,6 @@ export interface MultiplayerGame {
 const TOKEN_KEY = (roomId: string) => `mp_token_${roomId}`;
 
 export function useMultiplayerGame(roomId: string): MultiplayerGame {
-  const { data: session } = useSession();
   const [state, setState] = useState<GameState | null>(null);
   const [variant, setVariant] = useState<Variant | null>(null);
   const [myColor, setMyColor] = useState<Color | null>(null);
@@ -46,8 +44,7 @@ export function useMultiplayerGame(roomId: string): MultiplayerGame {
 
     function joinRoom() {
       const savedToken = sessionStorage.getItem(TOKEN_KEY(roomId)) ?? undefined;
-      const userId = session?.user?.id ?? undefined;
-      socket.emit("join_room", { roomId, playerToken: savedToken, userId }, (res) => {
+      socket.emit("join_room", { roomId, playerToken: savedToken }, (res) => {
         if (!res.ok) {
           setStatus("error");
           setStatusMessage(res.error);
@@ -125,7 +122,7 @@ export function useMultiplayerGame(roomId: string): MultiplayerGame {
       socket.off("error");
       socket.off("connect", joinRoom);
     };
-  }, [roomId, session?.user?.id]);
+  }, [roomId]);
 
   function sendMove(move: Move) {
     if (status !== "playing") return;

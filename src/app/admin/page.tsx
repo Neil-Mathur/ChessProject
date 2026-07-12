@@ -10,11 +10,12 @@ export default async function AdminPage() {
     redirect("/");
   }
 
-  const [users, accounts, sessions, preferences] = await Promise.all([
+  const [users, accounts, sessions, preferences, games] = await Promise.all([
     prisma.user.findMany({ take: 100, orderBy: { id: "asc" } }),
     prisma.account.findMany({ take: 100, orderBy: { id: "asc" } }),
     prisma.session.findMany({ take: 100, orderBy: { id: "asc" } }),
     prisma.preferences.findMany({ take: 100, orderBy: { id: "asc" } }),
+    prisma.game.findMany({ take: 100, orderBy: { createdAt: "desc" } }),
   ]);
 
   return (
@@ -46,6 +47,22 @@ export default async function AdminPage() {
         <Table
           headers={["id", "userId", "variantId", "boardThemeId", "pieceSetId", "orientation", "aiWhite", "aiBlack", "aiDepth"]}
           rows={preferences.map((p) => [p.id, p.userId, p.variantId, p.boardThemeId, p.pieceSetId, p.orientation, String(p.aiWhite), String(p.aiBlack), String(p.aiDepth)])}
+        />
+      </Section>
+
+      <Section title="Game" count={games.length}>
+        <Table
+          headers={["id", "variantId", "outcome", "reason", "moves", "whiteUserId", "blackUserId", "createdAt"]}
+          rows={games.map((g) => [
+            g.id,
+            g.variantId,
+            g.outcome,
+            g.reason,
+            (JSON.parse(g.moveLog) as string[]).length,
+            g.whiteUserId,
+            g.blackUserId,
+            g.createdAt.toISOString(),
+          ])}
         />
       </Section>
     </main>

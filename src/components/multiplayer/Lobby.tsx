@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { VARIANTS } from "@/engine/variants";
 import { getSocket } from "@/multiplayer/socket";
 import type { RoomInfo } from "@/multiplayer/protocol";
@@ -10,7 +9,6 @@ const TOKEN_KEY = (roomId: string) => `mp_token_${roomId}`;
 
 export default function Lobby() {
   const router = useRouter();
-  const { data: session } = useSession();
   const [variantId, setVariantId] = useState("standard");
   const [joinCode, setJoinCode] = useState("");
   const [creating, setCreating] = useState(false);
@@ -24,8 +22,7 @@ export default function Lobby() {
     if (!socket.connected) socket.connect();
 
     function doCreate() {
-      const userId = session?.user?.id ?? undefined;
-      socket.emit("create_room", variantId, userId, (info: RoomInfo) => {
+      socket.emit("create_room", variantId, (info: RoomInfo) => {
         sessionStorage.setItem(TOKEN_KEY(info.roomId), info.playerToken);
         router.push(`/play/${info.roomId}`);
       });
@@ -51,8 +48,7 @@ export default function Lobby() {
     if (!socket.connected) socket.connect();
 
     function doJoin() {
-      const userId = session?.user?.id ?? undefined;
-      socket.emit("join_room", { roomId: code, userId }, (res) => {
+      socket.emit("join_room", { roomId: code }, (res) => {
         if (!res.ok) {
           setJoining(false);
           setError(res.error);

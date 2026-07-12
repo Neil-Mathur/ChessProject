@@ -2,6 +2,7 @@
 // No React/Next.js imports — pure Node.js + engine.
 import type { Server as HttpServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
+import { getToken } from "next-auth/jwt";
 import { getVariant, squareName, fileOf } from "@/engine";
 import type { Color, GameState, Move } from "@/engine/types";
 import type { ClientToServer, ServerToClient } from "@/multiplayer/protocol";
@@ -13,6 +14,32 @@ import {
   colorForToken,
 } from "./gameRoom";
 import { prisma } from "@/lib/prisma";
+
+/** Per-socket data attached during the handshake. */
+interface SocketData {
+  /** Authenticated user id from the Auth.js session cookie, or null if anonymous. */
+  userId: string | null;
+}
+
+/**
+ * Resolve the signed-in user from the Auth.js JWT session cookie sent with the
+ * Socket.IO handshake. The cookie is signed with AUTH_SECRET, so — unlike a
+ * client-supplied payload — it cannot be forged to record games as another user.
+ */
+async function userIdFromHandshake(cookie: string | undefined): Promise<string | null> {
+  const secret = process.env.AUTH_SECRET;
+  if (!cookie || !secret) return null;
+  try {
+    const token = await getToken({
+      req: { headers: { cookie } },
+      secret,
+      secureCookie: cookie.includes("__Secure-authjs.session-token"),
+    });
+    return typeof token?.id === "string" ? token.id : null;
+  } catch {
+    return null;
+  }
+}
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
@@ -56,21 +83,40 @@ function describeMove(state: GameState, move: Move): string {
 }
 
 export function attachSocketIO(httpServer: HttpServer): void {
-  const io = new SocketIOServer<ClientToServer, ServerToClient>(httpServer, {
-    cors: { origin: "*", methods: ["GET", "POST"] },
+  const io = new SocketIOServer<
+    ClientToServer,
+    ServerToClient,
+    Record<string, never>,
+    SocketData
+  >(httpServer, {
+    // Same-origin clients don't need CORS; only allow the production domain
+    // cross-origin. Dev stays open for LAN/preview testing.
+    cors: {
+      origin:
+        process.env.NODE_ENV === "production"
+          ? ["https://madchesslab.com", "https://www.madchesslab.com"]
+          : "*",
+      methods: ["GET", "POST"],
+    },
+  });
+
+  // Authenticate the handshake once per connection; handlers read socket.data.
+  io.use(async (socket, next) => {
+    socket.data.userId = await userIdFromHandshake(socket.handshake.headers.cookie);
+    next();
   });
 
   io.on("connection", (socket) => {
     let joinedRoomId: string | null = null;
     let myColor: Color | null = null;
 
-    socket.on("create_room", (variantId, userId, cb) => {
+    socket.on("create_room", (variantId, cb) => {
       try {
         const variant = getVariant(variantId);
         const state = variant.setup();
         const room = createRoom(variantId, state);
         room.players.w = socket.id;
-        room.userIds.w = userId || null;
+        room.userIds.w = socket.data.userId;
         myColor = "w";
         joinedRoomId = room.id;
         socket.join(room.id);
@@ -88,7 +134,7 @@ export function attachSocketIO(httpServer: HttpServer): void {
       }
     });
 
-    socket.on("join_room", ({ roomId, playerToken, userId }, cb) => {
+    socket.on("join_room", ({ roomId, playerToken }, cb) => {
       const room = getRoom(roomId);
       if (!room) return cb({ ok: false, error: "Room not found." });
       if (room.result) return cb({ ok: false, error: "That game has already ended." });
@@ -124,7 +170,7 @@ export function attachSocketIO(httpServer: HttpServer): void {
       const token = Math.random().toString(36).slice(2, 18).toUpperCase();
       room.tokens.b = token;
       room.players.b = socket.id;
-      room.userIds.b = userId || null;
+      room.userIds.b = socket.data.userId;
       myColor = "b";
       joinedRoomId = room.id;
       socket.join(room.id);

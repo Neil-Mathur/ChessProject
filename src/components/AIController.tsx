@@ -40,9 +40,10 @@ export default function AIController() {
     setThinking(true);
 
     if (variant.id === "standard") {
-      // Stockfish via UCI
+      // Stockfish via UCI — use aiDepth as level (1-20), default to 10 if invalid
       const fen = toFullFen(state);
-      requestStockfishMove(fen, aiDepth).then((uciMove) => {
+      const level = aiDepth >= 1 && aiDepth <= 20 ? aiDepth : 10;
+      requestStockfishMove(fen, level).then((uciMove) => {
         if (token.current !== myToken) return;
         setThinking(false);
         if (uciMove) {
