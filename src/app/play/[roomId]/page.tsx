@@ -1,11 +1,7 @@
 "use client";
-import { redirect, useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-
-// Guard: if multiplayer is dark, redirect to home.
-if (process.env.NEXT_PUBLIC_MULTIPLAYER !== "true") {
-  redirect("/");
-}
+import { useEffect } from "react";
 
 const OnlineGame = dynamic(() => import("@/components/multiplayer/OnlineGame"), {
   ssr: false,
@@ -17,6 +13,18 @@ const OnlineGame = dynamic(() => import("@/components/multiplayer/OnlineGame"), 
 });
 
 export default function PlayPage() {
+  const router = useRouter();
   const { roomId } = useParams<{ roomId: string }>();
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_MULTIPLAYER !== "true") {
+      router.replace("/");
+    }
+  }, [router]);
+
+  if (process.env.NEXT_PUBLIC_MULTIPLAYER !== "true") {
+    return null;
+  }
+
   return <OnlineGame roomId={roomId.toUpperCase()} />;
 }
