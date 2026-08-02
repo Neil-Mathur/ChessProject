@@ -11,7 +11,7 @@ export default function Providers({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
       {/* Banner — 56px on mobile, 100px on desktop */}
-      <div className="relative w-full sticky top-0 z-50 bg-zinc-950 h-14 md:h-[100px]">
+      <div className="relative w-full sticky top-0 z-50 mt-[3px] bg-zinc-950 h-14 md:h-[100px]">
         <Image
           src={bannerImage}
           alt="Mad Chess Lab"
