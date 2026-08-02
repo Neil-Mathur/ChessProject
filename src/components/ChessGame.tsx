@@ -4,6 +4,7 @@ import { useGameStore } from "@/store/gameStore";
 import AIController from "./AIController";
 import BoardPanel from "./BoardPanel";
 import ControlsPanel from "./ControlsPanel";
+import SaveLocalGame from "./SaveLocalGame";
 
 export default function ChessGame() {
   const variant = useGameStore((s) => s.variant);
@@ -21,6 +22,7 @@ export default function ChessGame() {
         <ControlsPanel />
       </div>
       <AIController />
+      <SaveLocalGame />
     </main>
   );
 }

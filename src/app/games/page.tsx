@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -10,6 +10,7 @@ interface GameRecord {
   outcome: string;
   reason: string;
   moveCount: number;
+  moves: string[];
   playedAsWhite: boolean;
   playedAsBlack: boolean;
   won: boolean;
@@ -22,6 +23,7 @@ export default function GamesPage() {
   const [games, setGames] = useState<GameRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -82,9 +84,9 @@ export default function GamesPage() {
 
       {!loading && games.length === 0 && (
         <div className="rounded border border-zinc-700 bg-zinc-900 p-8 text-center">
-          <p className="text-zinc-400">No games yet.</p>
-          <Link href="/lobby" className="mt-4 inline-block text-blue-400 hover:text-blue-300">
-            Play online
+          <p className="text-zinc-400">No games yet. Finished games are saved here automatically while you are signed in.</p>
+          <Link href="/" className="mt-4 inline-block text-blue-400 hover:text-blue-300">
+            Play a game
           </Link>
         </div>
       )}
@@ -128,29 +130,59 @@ export default function GamesPage() {
                       ? "text-green-400"
                       : "text-red-400";
 
+                  const expanded = expandedId === game.id;
                   return (
-                    <tr
-                      key={game.id}
-                      className="border-b border-zinc-800 hover:bg-zinc-900"
-                    >
-                      <td className="px-4 py-3 text-xs text-zinc-400">
-                        {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                      </td>
-                      <td className="px-4 py-3 capitalize">{game.variantId}</td>
-                      <td className="px-4 py-3 text-xs">
-                        {game.playedAsWhite ? "White" : "Black"}
-                      </td>
-                      <td className={`px-4 py-3 font-semibold ${resultColor}`}>
-                        {isDraw ? "Draw" : isWin ? "Won" : "Lost"}
-                        <br />
-                        <span className="text-xs font-normal text-zinc-500">
-                          {game.reason}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right text-xs text-zinc-400">
-                        {game.moveCount}
-                      </td>
-                    </tr>
+                    <Fragment key={game.id}>
+                      <tr
+                        onClick={() => setExpandedId(expanded ? null : game.id)}
+                        className="cursor-pointer border-b border-zinc-800 hover:bg-zinc-900"
+                      >
+                        <td className="px-4 py-3 text-xs text-zinc-400">
+                          {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </td>
+                        <td className="px-4 py-3 capitalize">{game.variantId}</td>
+                        <td className="px-4 py-3 text-xs">
+                          {game.playedAsWhite && game.playedAsBlack
+                            ? "Both"
+                            : game.playedAsWhite
+                              ? "White"
+                              : "Black"}
+                        </td>
+                        <td className={`px-4 py-3 font-semibold ${resultColor}`}>
+                          {isDraw ? "Draw" : isWin ? "Won" : "Lost"}
+                          <br />
+                          <span className="text-xs font-normal text-zinc-500">
+                            {game.reason}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right text-xs text-zinc-400">
+                          {game.moveCount}
+                        </td>
+                      </tr>
+                      {expanded && (
+                        <tr className="border-b border-zinc-800 bg-zinc-900/50">
+                          <td colSpan={5} className="px-4 py-3">
+                            <p className="mb-2 text-xs font-semibold text-zinc-400">
+                              Notation
+                            </p>
+                            <div className="max-h-64 overflow-y-auto rounded bg-zinc-950 p-3 font-mono text-xs leading-6 text-zinc-300">
+                              {game.moves.length === 0
+                                ? "No moves recorded"
+                                : game.moves
+                                    .reduce<string[]>((pairs, move, i) => {
+                                      if (i % 2 === 0) {
+                                        pairs.push(`${i / 2 + 1}. ${move}`);
+                                      } else {
+                                        pairs[pairs.length - 1] += ` ${move}`;
+                                      }
+                                      return pairs;
+                                    }, [])
+                                    .join("  ")}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
                   );
                 })}
               </tbody>
