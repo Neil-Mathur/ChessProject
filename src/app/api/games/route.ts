@@ -20,20 +20,24 @@ export async function GET() {
     });
 
     // Transform the response: parse moveLog and compute user's outcome
-    const gamesWithDetails = games.map((g) => ({
-      id: g.id,
-      variantId: g.variantId,
-      outcome: g.outcome, // "white" | "black" | "draw"
-      reason: g.reason,
-      moveCount: (JSON.parse(g.moveLog) as string[]).length,
-      playedAsWhite: g.whiteUserId === userId,
-      playedAsBlack: g.blackUserId === userId,
-      won:
-        g.outcome === "draw"
-          ? false
-          : (g.outcome === "white") === (g.whiteUserId === userId),
-      createdAt: g.createdAt,
-    }));
+    const gamesWithDetails = games.map((g) => {
+      const moves = JSON.parse(g.moveLog) as string[];
+      return {
+        id: g.id,
+        variantId: g.variantId,
+        outcome: g.outcome,
+        reason: g.reason,
+        moveCount: moves.length,
+        moves: moves,
+        playedAsWhite: g.whiteUserId === userId,
+        playedAsBlack: g.blackUserId === userId,
+        won:
+          g.outcome === "draw"
+            ? false
+            : (g.outcome === "white") === (g.whiteUserId === userId),
+        createdAt: g.createdAt,
+      };
+    });
 
     return NextResponse.json(gamesWithDetails);
   } catch (err) {
