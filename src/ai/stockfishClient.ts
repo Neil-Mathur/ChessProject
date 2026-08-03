@@ -1,6 +1,7 @@
 // Client for the Stockfish 18 WASM engine.
-// The single-threaded build in /public/stockfish.js runs as a self-contained
-// Web Worker when its URL hash is set to "#,worker".
+// The single-threaded build in /public/stockfish.js self-detects the Worker
+// context and boots the engine — no URL hash (a "#...,<flag>" hash suppresses
+// auto-init in this build and leaves the worker silent).
 // UCI commands are sent via postMessage; UCI output arrives via onmessage.
 
 let worker: Worker | null = null;
@@ -11,7 +12,7 @@ let pendingResolve: ((move: string | null) => void) | null = null;
 
 function getWorker(): Worker {
   if (!worker) {
-    worker = new Worker("/stockfish.js#,worker");
+    worker = new Worker("/stockfish.js");
     worker.onmessage = (e: MessageEvent<string>) => {
       const line: string = typeof e.data === "string" ? e.data : String(e.data);
       if (line.startsWith("bestmove") && pendingResolve) {
